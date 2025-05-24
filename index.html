@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İstanbul Turist Rehberi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .hero-bg {
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://placehold.co/1200x600/007bff/ffffff?text=İstanbul+Silüeti');
+            background-size: cover;
+            background-position: center;
+        }
+        .section-title {
+            @apply text-3xl font-bold text-center mb-8 text-gray-800;
+        }
+        .card {
+            @apply bg-white rounded-xl shadow-lg overflow-hidden transform transition-all hover:scale-105;
+        }
+        .card-content {
+            @apply p-6;
+        }
+        .nav-link {
+            @apply px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md transition-colors;
+        }
+        .active-nav-link {
+            @apply px-4 py-2 text-blue-600 bg-blue-100 font-semibold rounded-md;
+        }
+        #mobile-menu {
+            display: none;
+        }
+        .fare-calculator select, .fare-calculator input {
+            @apply w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow;
+        }
+        .fare-calculator button {
+            @apply w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold;
+        }
+        .fare-result {
+            @apply mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-center;
+        }
+        
+        /* FullCalendar için ek stiller ve uyarlamalar */
+        .fc { 
+            @apply rounded-lg shadow-md border border-gray-200 bg-white;
+            max-width: 100%; 
+        }
+        .fc .fc-toolbar.fc-header-toolbar {
+            @apply mb-4 p-3 bg-gray-50 rounded-t-lg border-b border-gray-200; 
+        }
+        .fc .fc-toolbar-title {
+            @apply text-base sm:text-lg font-semibold text-gray-700; 
+        }
+        .fc .fc-button { 
+            @apply bg-blue-500 hover:bg-blue-600 text-white text-xs sm:text-sm px-3 py-1.5 rounded-md border-none shadow-sm;
+        }
+        .fc .fc-button-primary:disabled {
+            @apply bg-gray-300;
+        }
+        .fc .fc-button-group .fc-button {
+            @apply rounded-none;
+        }
+        .fc .fc-button-group .fc-button:first-child {
+            @apply rounded-l-md;
+        }
+        .fc .fc-button-group .fc-button:last-child {
+            @apply rounded-r-md;
+        }
+        .fc .fc-daygrid-day-number, .fc .fc-col-header-cell-cushion { 
+            @apply text-xs sm:text-sm text-gray-700;
+        }
+        .fc .fc-day-today { 
+            @apply bg-blue-50 !important; 
+        }
+         .fc-event { 
+            @apply bg-red-500 border-red-500 text-white p-1 text-xs rounded cursor-pointer;
+        }
+        .fc-event.event-konser { @apply bg-purple-500 border-purple-500; }
+        .fc-event.event-tiyatro { @apply bg-green-500 border-green-500; }
+        .fc-event.event-sinema { @apply bg-yellow-500 border-yellow-500 text-black; }
+        .fc-event.event-opera { @apply bg-pink-500 border-pink-500; }
+        .fc-event.event-bale { @apply bg-teal-500 border-teal-500; }
+        .fc-event.event-diger { @apply bg-indigo-500 border-indigo-500; }
+
+
+        .event-list {
+            @apply mt-6 md:mt-0 bg-white p-4 sm:p-6 rounded-lg shadow-md border border-gray-200;
+        }
+        .event-item {
+            @apply py-3 border-b border-gray-200 last:border-b-0;
+        }
+        .event-item h4 {
+            @apply text-base sm:text-lg font-semibold text-blue-700;
+        }
+        .event-item p {
+            @apply text-xs sm:text-sm;
+        }
+
+        /* Detay Sayfası Genel Stilleri */
+        .detail-page-container { 
+            @apply bg-white p-6 sm:p-10 rounded-lg shadow-xl my-8; 
+        }
+        .detail-page-content img {
+            @apply w-full h-72 sm:h-96 object-cover rounded-lg mb-6 shadow-md;
+        }
+         .detail-page-content h4 {
+            @apply text-xl font-semibold text-gray-700 mt-6 mb-2; 
+        }
+        .detail-page-content p {
+            @apply text-gray-600 mb-4 leading-relaxed text-base;
+        }
+        .detail-page-content ul {
+            @apply list-disc list-inside text-gray-600 mb-4 space-y-1 pl-5;
+        }
+        .detail-example-item { 
+            @apply mb-3 pb-3 border-b border-gray-200 last:border-b-0 last:pb-0;
+        }
+        .detail-example-item strong {
+            @apply text-gray-700;
+        }
+
+        .back-to-main-button {
+             @apply inline-flex items-center mb-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors shadow-md;
+        }
+        .back-to-main-button svg {
+            @apply w-5 h-5 mr-2;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <header class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-blue-600">İstanbul Rehberi</a>
+            <nav class="hidden md:flex space-x-2">
+                <a href="#konaklama" class="nav-link">Konaklama</a>
+                <a href="#ulasim" class="nav-link">Ulaşım</a>
+                <a href="#tarihi-mekanlar" class="nav-link">Tarihi Mekanlar</a>
+                <a href="#etkinlikler" class="nav-link">Etkinlikler</a>
+                <a href="#turk-kulturu" class="nav-link">Türk Kültürü</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden text-gray-700 hover:text-blue-600 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="md:hidden bg-white shadow-lg">
+            <a href="#konaklama" class="block px-6 py-3 text-gray-700 hover:bg-gray-100">Konaklama</a>
+            <a href="#ulasim" class="block px-6 py-3 text-gray-700 hover:bg-gray-100">Ulaşım</a>
+            <a href="#tarihi-mekanlar" class="block px-6 py-3 text-gray-700 hover:bg-gray-100">Tarihi Mekanlar</a>
+            <a href="#etkinlikler" class="block px-6 py-3 text-gray-700 hover:bg-gray-100">Etkinlikler</a>
+            <a href="#turk-kulturu" class="block px-6 py-3 text-gray-700 hover:bg-gray-100">Türk Kültürü</a>
+        </div>
+    </header>
+
+    <section class="hero-bg h-96 flex items-center justify-center text-white">
+        <div class="text-center">
+            <h1 class="text-5xl font-bold mb-4">İstanbul'u Keşfedin</h1>
+            <p class="text-xl">Unutulmaz bir deneyim için rehberiniz.</p>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-6 py-12">
+        <div id="mainPageContent">
+            <section id="konaklama" class="py-12">
+                 <h2 class="section-title">Konaklama Tavsiyeleri</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card">
+                        <img src="https://placehold.co/400x250/E8A0BF/ffffff?text=Lüks+Otel" alt="Lüks Otel" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/cccccc/ffffff?text=Image+Not+Found';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800">Lüks Oteller</h3>
+                            <p class="text-gray-600 mb-4">Boğaz manzaralı, 5 yıldızlı konforun keyfini çıkarın.</p>
+                            <button onclick="showAccommodationDetailsPage('Lüks Oteller')" class="text-blue-600 hover:underline font-medium">Detayları Gör</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img src="https://placehold.co/400x250/A0E8BF/ffffff?text=Butik+Otel" alt="Butik Otel" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/cccccc/ffffff?text=Image+Not+Found';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800">Butik Oteller</h3>
+                            <p class="text-gray-600 mb-4">Tarihi yarımadada, otantik bir deneyim yaşayın.</p>
+                            <button onclick="showAccommodationDetailsPage('Butik Oteller')" class="text-blue-600 hover:underline font-medium">Detayları Gör</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img src="https://placehold.co/400x250/BFA0E8/ffffff?text=Kiralık+Daire" alt="Kiralık Daire" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/cccccc/ffffff?text=Image+Not+Found';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800">Kiralık Daireler</h3>
+                            <p class="text-gray-600 mb-4">Ev konforunda, şehrin kalbinde konaklayın.</p>
+                            <button onclick="showAccommodationDetailsPage('Kiralık Daireler')" class="text-blue-600 hover:underline font-medium">Detayları Gör</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ulasim" class="py-12 bg-gray-100 -mx-6 px-6">
+                <h2 class="section-title">Ulaşım Bilgileri</h2>
+                <div class="grid md:grid-cols-2 gap-8 items-start">
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-800">Taksi ile Ulaşım</h3>
+                        <p class="text-gray-600 mb-4">İstanbul'da taksi bulmak kolaydır. Güvenilir duraklardan veya mobil uygulamalardan taksi çağırabilirsiniz. Taksimetrenin açık olduğundan emin olun.</p>
+                        <div class="fare-calculator mt-6 space-y-4">
+                            <h4 class="text-xl font-semibold mb-3 text-gray-700">Tahmini Taksi Ücreti Hesaplayıcı</h4>
+                            <div>
+                                <label for="origin" class="block text-sm font-medium text-gray-700 mb-1">Nereden:</label>
+                                <select id="origin" name="origin" class="bg-white"> <option value="">Başlangıç noktası seçin</option>
+                                    </select>
+                            </div>
+                            <div>
+                                <label for="destination" class="block text-sm font-medium text-gray-700 mb-1">Nereye:</label>
+                                <select id="destination" name="destination" class="bg-white"> <option value="">Varış noktası seçin</option>
+                                    </select>
+                            </div>
+                            <button id="calculateFareBtn" class="mt-3">Hesapla</button>
+                            <div id="fareResult" class="fare-result" style="display: none;"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-4">*Bu hesaplama tahmini bir değerdir ve seçilen popüler noktalar arasındaki basitleştirilmiş mesafelere dayanmaktadır. Gerçek ücret trafik ve güzergaha göre değişiklik gösterebilir. Güncel açılış ücreti: <span id="baseFareInfo">24.55</span> TL, km başına ücret: <span id="kmRateInfo">17.61</span> TL, minimum ücret (indi-bindi): <span id="minFareInfo">90</span> TL.</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-800">Toplu Taşıma</h3>
+                        <p class="text-gray-600 mb-4">İstanbul geniş bir toplu taşıma ağına sahiptir. İstanbulkart edinerek tüm toplu taşıma araçlarını kullanabilirsiniz.</p>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <svg class="w-6 h-6 text-blue-600 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 019 17.414V13H6a1 1 0 01-1-1V4a1 1 0 011-1zM5 5v6h4V5H5zm6 0v3.586l2.707 2.707a1 1 0 001.414-1.414L13 7.414V5h-2z" clip-rule="evenodd"></path></svg>
+                                <div>
+                                    <h4 class="font-semibold text-gray-700">Metro & Marmaray</h4>
+                                    <p class="text-gray-600 text-sm">Şehrin birçok noktasına hızlı ulaşım sağlar. Marmaray, Asya ve Avrupa yakalarını denizin altından birbirine bağlar.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-6 h-6 text-blue-600 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M3 3a1 1 0 000 2v8a1 1 0 001 1h1.586l1.707 1.707A1 1 0 008 16v-3h4v3a1 1 0 001.707-.707L15.414 14H17a1 1 0 001-1V5a1 1 0 000-2H3z"></path></svg>
+                                <div>
+                                    <h4 class="font-semibold text-gray-700">Otobüs & Metrobüs</h4>
+                                    <p class="text-gray-600 text-sm">Geniş güzergah ağı ile şehrin her yerine ulaşım imkanı. Metrobüs, kendine özel yolu sayesinde trafikten etkilenmez.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-6 h-6 text-blue-600 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm1 2a1 1 0 00-1 1v1h12V6a1 1 0 00-1-1H6zm0 4a1 1 0 00-1 1v1h12v-1a1 1 0 00-1-1H6zm0 4a1 1 0 00-1 1v1h12v-1a1 1 0 00-1-1H6z" clip-rule="evenodd"></path></svg>
+                                <div>
+                                    <h4 class="font-semibold text-gray-700">Vapur & Deniz Otobüsü</h4>
+                                    <p class="text-gray-600 text-sm">Boğaz'ın keyfini çıkararak iki yaka arasında seyahat edin. Adalar'a ulaşım için de idealdir.</p>
+                                </div>
+                            </li>
+                        </ul>
+                        <a href="https://www.metro.istanbul/" target="_blank" class="mt-4 inline-block text-blue-600 hover:underline font-medium">Metro İstanbul Resmi Sitesi</a><br>
+                        <a href="https://www.iett.istanbul/" target="_blank" class="mt-1 inline-block text-blue-600 hover:underline font-medium">İETT Resmi Sitesi</a>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tarihi-mekanlar" class="py-12">
+                <h2 class="section-title">Görülmesi Gereken Tarihi Mekanlar</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card">
+                        <img src="https://placehold.co/400x250/FFC0CB/000000?text=Ayasofya" alt="Ayasofya" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/cccccc/ffffff?text=Image+Not+Found';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800">Ayasofya-i Kebir Cami-i Şerifi</h3>
+                            <p class="text-gray-600 mb-4">Dünya mimarlık tarihinin en önemli anıtlarından biri.</p>
+                            <button onclick="showHistoricalPlaceDetailsPage('Ayasofya-i Kebir Cami-i Şerifi')" class="text-blue-600 hover:underline font-medium">Daha Fazla Bilgi</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img src="https://placehold.co/400x250/ADD8E6/000000?text=Galata+Kulesi" alt="Galata Kulesi" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/cccccc/ffffff?text=Image+Not+Found';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800">Galata Kulesi</h3>
+                            <p class="text-gray-600 mb-4">İstanbul'un 360 derecelik panoramik manzarası.</p>
+                            <button onclick="showHistoricalPlaceDetailsPage('Galata Kulesi')" class="text-blue-600 hover:underline font-medium">Daha Fazla Bilgi</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img src="https://placehold.co/400x250/90EE90/000000?text=Kız+Kulesi" alt="Kız Kulesi" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/cccccc/ffffff?text=Image+Not+Found';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800">Kız Kulesi</h3>
+                            <p class="text-gray-600 mb-4">Boğaz'ın ortasında, efsanelere konu olmuş yapı.</p>
+                            <button onclick="showHistoricalPlaceDetailsPage('Kız Kulesi')" class="text-blue-600 hover:underline font-medium">Daha Fazla Bilgi</button>
+                        </div>
+                    </div>
+                     <div class="card">
+                        <img src="https://placehold.co/400x250/FFFFE0/000000?text=Topkapı+Sarayı" alt="Topkapı Sarayı" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/cccccc/ffffff?text=Image+Not+Found';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800">Topkapı Sarayı</h3>
+                            <p class="text-gray-600 mb-4">Osmanlı İmparatorluğu'nun kalbi.</p>
+                            <button onclick="showHistoricalPlaceDetailsPage('Topkapı Sarayı')" class="text-blue-600 hover:underline font-medium">Daha Fazla Bilgi</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="etkinlikler" class="py-12 bg-gray-100 -mx-6 px-6">
+                <h2 class="section-title">Günlük Etkinlik Takvimi</h2>
+                <div class="grid md:grid-cols-3 gap-8 items-start">
+                    <div id="fullCalendarContainer" class="calendar md:col-span-2">
+                        </div>
+                    <div id="eventListContainer" class="event-list md:col-span-1">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700">Seçili Günün Etkinlikleri</h3>
+                        <div id="eventsForDate">
+                            <p class="text-gray-500">Lütfen takvimden bir gün seçin.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="turk-kulturu" class="py-12">
+                <h2 class="section-title">Türk Kültürünü Deneyimleyin</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="card">
+                        <img src="https://placehold.co/400x250/FFDAB9/000000?text=Türk+Hamamı" alt="Türk Hamamı" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/cccccc/ffffff?text=Image+Not+Found';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800">Tarihi Türk Hamamları</h3>
+                            <p class="text-gray-600 mb-4">Geleneksel Türk hamamı deneyimiyle rahatlayın ve yenilenin.</p>
+                            <button onclick="showTurkishCultureDetailsPage('Tarihi Türk Hamamları')" class="text-blue-600 hover:underline font-medium">Daha Fazla Bilgi</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img src="https://placehold.co/400x250/98FB98/000000?text=Türk+Mutfağı" alt="Türk Mutfağı" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/cccccc/ffffff?text=Image+Not+Found';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800">Lezzetli Türk Mutfağı</h3>
+                            <p class="text-gray-600 mb-4">Kebaplardan mezelere, tatlılardan yöresel lezzetlere kadar zengin Türk mutfağını keşfedin.</p>
+                             <button onclick="showTurkishCultureDetailsPage('Lezzetli Türk Mutfağı')" class="text-blue-600 hover:underline font-medium">Daha Fazla Bilgi</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div> 
+        <div id="accommodationDetailPage" class="hidden detail-page-container">
+            </div>
+        <div id="historicalPlaceDetailPage" class="hidden detail-page-container">
+            </div>
+        <div id="turkishCultureDetailPage" class="hidden detail-page-container"> 
+            </div>
+
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center py-8">
+        <p>&copy; <span id="currentYear"></span> İstanbul Turist Rehberi. Tüm hakları saklıdır.</p>
+        <p class="text-sm text-gray-400">Sevgiyle hazırlandı.</p>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script>
+        // Mobil menü toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.style.display = mobileMenu.style.display === 'block' ? 'none' : 'block';
+            });
+        }
+
+        const navLinksAll = document.querySelectorAll('#mobile-menu a, header nav a');
+        navLinksAll.forEach(link => {
+            link.addEventListener('click', (event) => {
+                if (mobileMenu && mobileMenu.style.display === 'block') {
+                    mobileMenu.style.display = 'none';
+                }
+                const href = link.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    if (document.getElementById('accommodationDetailPage').style.display !== 'none') {
+                        hideAccommodationDetailsPage();
+                    }
+                    if (document.getElementById('historicalPlaceDetailPage').style.display !== 'none') {
+                        hideHistoricalPlaceDetailsPage();
+                    }
+                    if (document.getElementById('turkishCultureDetailPage').style.display !== 'none') { // Yeni eklendi
+                        hideTurkishCultureDetailsPage();
+                    }
+                    setTimeout(() => {
+                        const targetElement = document.querySelector(href);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }, 100);
+                }
+            });
+        });
+
+        // Taksi ücreti hesaplayıcı
+        const calculateFareBtn = document.getElementById('calculateFareBtn');
+        const originSelect = document.getElementById('origin');
+        const destinationSelect = document.getElementById('destination');
+        const fareResultDiv = document.getElementById('fareResult');
+        const baseFareInfoEl = document.getElementById('baseFareInfo');
+        const kmRateInfoEl = document.getElementById('kmRateInfo');
+        const minFareInfoEl = document.getElementById('minFareInfo');
+
+        if (baseFareInfoEl && kmRateInfoEl && minFareInfoEl && originSelect && destinationSelect && calculateFareBtn && fareResultDiv){
+            const baseFare = parseFloat(baseFareInfoEl.textContent);
+            const perKmRate = parseFloat(kmRateInfoEl.textContent);
+            const minFare = parseFloat(minFareInfoEl.textContent);
+            
+            const locations = [
+                { id: "taksim", name: "Taksim Meydanı" }, { id: "sultanahmet", name: "Sultanahmet Camii" }, { id: "kadikoy", name: "Kadıköy İskelesi" }, { id: "besiktas", name: "Beşiktaş Çarşı" }, { id: "havalimani_ist", name: "İstanbul Havalimanı (IST)" }, { id: "havalimani_saw", name: "Sabiha Gökçen Havalimanı (SAW)" }, { id: "galataport", name: "Galataport" }, { id: "eminonu", name: "Eminönü" }, { id: "ortakoy", name: "Ortaköy" }, { id: "nisantasi", name: "Nişantaşı" }
+            ];
+            const distanceMatrix = {
+                "taksim": { "sultanahmet": 5, "kadikoy": 15, "besiktas": 3, "havalimani_ist": 40, "havalimani_saw": 45, "galataport": 2, "eminonu": 4, "ortakoy": 4, "nisantasi": 2 }, "sultanahmet": { "taksim": 5, "kadikoy": 18, "besiktas": 8, "havalimani_ist": 45, "havalimani_saw": 48, "galataport": 4, "eminonu": 1, "ortakoy": 9, "nisantasi": 7 }, "kadikoy": { "taksim": 15, "sultanahmet": 18, "besiktas": 12, "havalimani_ist": 55, "havalimani_saw": 30, "galataport": 16, "eminonu": 17, "ortakoy": 13, "nisantasi": 17 }, "besiktas": { "taksim": 3, "sultanahmet": 8, "kadikoy": 12, "havalimani_ist": 42, "havalimani_saw": 46, "galataport": 5, "eminonu": 7, "ortakoy": 1, "nisantasi": 4 }, "havalimani_ist": { "taksim": 40, "sultanahmet": 45, "kadikoy": 55, "besiktas": 42, "havalimani_saw": 80, "galataport": 42, "eminonu": 44, "ortakoy": 43, "nisantasi": 41 }, "havalimani_saw": { "taksim": 45, "sultanahmet": 48, "kadikoy": 30, "besiktas": 46, "havalimani_ist": 80, "galataport": 47, "eminonu": 47, "ortakoy": 47, "nisantasi": 48 }, "galataport": { "taksim": 2, "sultanahmet": 4, "kadikoy": 16, "besiktas": 5, "havalimani_ist": 42, "havalimani_saw": 47, "eminonu": 2, "ortakoy": 6, "nisantasi": 4 }, "eminonu": { "taksim": 4, "sultanahmet": 1, "kadikoy": 17, "besiktas": 7, "havalimani_ist": 44, "havalimani_saw": 47, "galataport": 2, "ortakoy": 8, "nisantasi": 6 }, "ortakoy": { "taksim": 4, "sultanahmet": 9, "kadikoy": 13, "besiktas": 1, "havalimani_ist": 43, "havalimani_saw": 47, "galataport": 6, "eminonu": 8, "nisantasi": 5 }, "nisantasi": { "taksim": 2, "sultanahmet": 7, "kadikoy": 17, "besiktas": 4, "havalimani_ist": 41, "havalimani_saw": 48, "galataport": 4, "eminonu": 6, "ortakoy": 5 }
+            };
+            function populateLocationDropdowns() {
+                locations.forEach(location => {
+                    const optionOrigin = document.createElement('option'); optionOrigin.value = location.id; optionOrigin.textContent = location.name; originSelect.appendChild(optionOrigin);
+                    const optionDestination = document.createElement('option'); optionDestination.value = location.id; optionDestination.textContent = location.name; destinationSelect.appendChild(optionDestination);
+                });
+            }
+            populateLocationDropdowns();
+            calculateFareBtn.addEventListener('click', () => {
+                const originId = originSelect.value; const destinationId = destinationSelect.value;
+                fareResultDiv.classList.remove('bg-red-100', 'border-red-300', 'text-red-700'); fareResultDiv.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-700');
+                if (!originId || !destinationId) {
+                    fareResultDiv.textContent = 'Lütfen hem başlangıç hem de varış noktası seçin.'; fareResultDiv.style.display = 'block'; fareResultDiv.classList.remove('bg-blue-50', 'border-blue-200', 'text-blue-700'); fareResultDiv.classList.add('bg-red-100', 'border-red-300', 'text-red-700'); return;
+                }
+                if (originId === destinationId) {
+                    fareResultDiv.textContent = `Aynı noktayı seçtiniz. Tahmini ücret: ${minFare.toFixed(2)} TL (Minimum indi-bindi ücreti uygulanır).`; fareResultDiv.style.display = 'block'; return;
+                }
+                let distance = 0;
+                if (distanceMatrix[originId] && distanceMatrix[originId][destinationId]) { distance = distanceMatrix[originId][destinationId]; } else if (distanceMatrix[destinationId] && distanceMatrix[destinationId][originId]) { distance = distanceMatrix[destinationId][originId]; } else {
+                    fareResultDiv.textContent = 'Seçilen konumlar arasında mesafe bilgisi bulunamadı. Lütfen farklı konumlar deneyin.'; fareResultDiv.style.display = 'block'; fareResultDiv.classList.remove('bg-blue-50', 'border-blue-200', 'text-blue-700'); fareResultDiv.classList.add('bg-red-100', 'border-red-300', 'text-red-700'); return;
+                }
+                let estimatedFare = baseFare + (distance * perKmRate); if (estimatedFare < minFare) { estimatedFare = minFare; }
+                fareResultDiv.textContent = `Tahmini Ücret (${originSelect.options[originSelect.selectedIndex].text} - ${destinationSelect.options[destinationSelect.selectedIndex].text}, ~${distance} km): ${estimatedFare.toFixed(2)} TL`; fareResultDiv.style.display = 'block';
+            });
+        }
+
+        const currentYearEl = document.getElementById('currentYear');
+        if (currentYearEl) {
+            currentYearEl.textContent = new Date().getFullYear();
+        }
+        
+        const mainPageContent = document.getElementById('mainPageContent');
+        
+        // Konaklama Detayları
+        const accommodationDetailPage = document.getElementById('accommodationDetailPage');
+        const accommodationData = {
+            "Lüks Oteller": { img: "https://placehold.co/800x500/E8A0BF/ffffff?text=Lüks+Otel+Detayı", description: "İstanbul'un en prestijli lüks otelleri...", features: ["Boğaz Manzarası", "..."], priceRange: "5000 TL - 25000 TL", examples: [{ name: "The Peninsula Istanbul", shortDesc: "..." }]},
+            "Butik Oteller": { img: "https://placehold.co/800x500/A0E8BF/ffffff?text=Butik+Otel+Detayı", description: "Tarihi yarımada başta olmak üzere...", features: ["Otantik Atmosfer", "..."], priceRange: "2500 TL - 10000 TL", examples: [{ name: "Neorion Hotel", shortDesc: "..." }]},
+            "Kiralık Daireler": { img: "https://placehold.co/800x500/BFA0E8/ffffff?text=Kiralık+Daire+Detayı", description: "Özellikle uzun süreli konaklamalar...", features: ["Ev Konforu", "..."], priceRange: "1500 TL - 7000 TL", examples: [{ name: "Galata'da Daire", shortDesc: "..." }]}
+        };
+
+        function showAccommodationDetailsPage(type) {
+            const data = accommodationData[type];
+            if (data && mainPageContent && accommodationDetailPage) {
+                mainPageContent.style.display = 'none'; 
+                let featuresHTML = '<ul>'; data.features.forEach(f => { featuresHTML += `<li>${f}</li>`; }); featuresHTML += '</ul>';
+                let examplesHTML = ''; if (data.examples && data.examples.length > 0) { examplesHTML = '<h4>Örnek Konaklama Yerleri:</h4><ul class="list-none pl-0">'; data.examples.forEach(ex => { examplesHTML += `<li class="detail-example-item"><strong>${ex.name}:</strong> ${ex.shortDesc}</li>`; }); examplesHTML += '</ul>'; }
+                accommodationDetailPage.innerHTML = `<button id="backToMainAccommodationBtn" class="back-to-main-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>Geri Dön</button><h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">${type}</h2><div class="detail-page-content"><img src="${data.img}" alt="${type}" onerror="this.onerror=null;this.src='https://placehold.co/800x500/cccccc/ffffff?text=Resim+Bulunamadı';"><p>${data.description}</p><h4>Öne Çıkan Özellikler:</h4>${featuresHTML}${examplesHTML}<h4>Fiyat Aralığı (Tahmini):</h4><p>${data.priceRange}</p></div>`;
+                accommodationDetailPage.style.display = 'block'; window.scrollTo(0, 0); 
+                document.getElementById('backToMainAccommodationBtn').addEventListener('click', hideAccommodationDetailsPage);
+            }
+        }
+        function hideAccommodationDetailsPage() {
+            if (mainPageContent && accommodationDetailPage) { accommodationDetailPage.style.display = 'none'; accommodationDetailPage.innerHTML = ''; mainPageContent.style.display = 'block'; window.location.hash = '#konaklama'; }
+        }
+
+        // Tarihi Mekan Detayları
+        const historicalPlaceDetailPage = document.getElementById('historicalPlaceDetailPage');
+        const historicalPlacesData = {
+            "Ayasofya-i Kebir Cami-i Şerifi": { img: "https://placehold.co/800x500/FFC0CB/000000?text=Ayasofya+Detay", description: "Ayasofya, mimarlık tarihinde bir dönüm noktası...", visitingInfo: "Cami olarak ibadete açıktır..." },
+            "Galata Kulesi": { img: "https://placehold.co/800x500/ADD8E6/000000?text=Galata+Kulesi+Detay", description: "İstanbul'un en ikonik simgelerinden biri...", visitingInfo: "Ziyarete açıktır..." },
+            "Kız Kulesi": { img: "https://placehold.co/800x500/90EE90/000000?text=Kız+Kulesi+Detay", description: "İstanbul Boğazı'nın Salacak açıklarındaki...", visitingInfo: "Anıt müze olarak ziyarete açıktır..." },
+            "Topkapı Sarayı": { img: "https://placehold.co/800x500/FFFFE0/000000?text=Topkapı+Sarayı+Detay", description: "Osmanlı İmparatorluğu'nun yaklaşık 400 yıl...", visitingInfo: "Müze olarak ziyarete açıktır..." }
+        };
+
+        function showHistoricalPlaceDetailsPage(placeName) {
+            const data = historicalPlacesData[placeName];
+            if (data && mainPageContent && historicalPlaceDetailPage) {
+                mainPageContent.style.display = 'none';
+                historicalPlaceDetailPage.innerHTML = `<button id="backToMainHistoricalBtn" class="back-to-main-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>Geri Dön</button><h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">${placeName}</h2><div class="detail-page-content"><img src="${data.img}" alt="${placeName}" onerror="this.onerror=null;this.src='https://placehold.co/800x500/cccccc/ffffff?text=Resim+Bulunamadı';"><p>${data.description}</p>${data.visitingInfo ? `<h4>Ziyaret Bilgileri:</h4><p>${data.visitingInfo}</p>` : ''}</div>`;
+                historicalPlaceDetailPage.style.display = 'block'; window.scrollTo(0, 0);
+                document.getElementById('backToMainHistoricalBtn').addEventListener('click', hideHistoricalPlaceDetailsPage);
+            }
+        }
+        function hideHistoricalPlaceDetailsPage() {
+            if (mainPageContent && historicalPlaceDetailPage) { historicalPlaceDetailPage.style.display = 'none'; historicalPlaceDetailPage.innerHTML = ''; mainPageContent.style.display = 'block'; window.location.hash = '#tarihi-mekanlar'; }
+        }
+
+        // Türk Kültürü Detayları
+        const turkishCultureDetailPage = document.getElementById('turkishCultureDetailPage');
+        const turkishCultureData = {
+            "Tarihi Türk Hamamları": {
+                img: "https://placehold.co/800x500/FFDAB9/000000?text=Türk+Hamamı+Detay",
+                description: "Türk hamamı, sadece bir yıkanma yeri olmanın ötesinde, yüzyıllardır süregelen bir sosyal ve kültürel geleneğin merkezidir. Roma ve Bizans banyo geleneklerinden etkilenerek gelişen Türk hamamları, Osmanlı İmparatorluğu döneminde mimari ve ritüel açısından zirveye ulaşmıştır. Hamamlar, sıcaklık (sıcak oda), ılıklık (ılıman oda) ve soğukluk (soğuk oda veya dinlenme alanı) olmak üzere üç ana bölümden oluşur. Geleneksel bir hamam deneyimi genellikle kese (vücudu ölü derilerden arındırma) ve köpük masajını içerir. Bu deneyim, hem bedensel hem de zihinsel bir arınma sağlar. İstanbul'da Çemberlitaş, Cağaloğlu ve Süleymaniye gibi tarihi hamamlar, bu geleneği otantik atmosferlerinde yaşamak isteyenler için popüler seçeneklerdir.",
+                tips: ["Hamama gitmeden önce hafif bir şeyler yiyin.", "Yanınızda kendi peştamalınızı, havlunuzu ve terliklerinizi getirebilirsiniz, ancak çoğu hamam bunları sağlar.", "Sıcaklıkta çok uzun süre kalmamaya dikkat edin ve bol su için.", "Kese ve masaj hizmetleri genellikle ek ücrete tabidir."],
+                examples: [
+                    { name: "Çemberlitaş Hamamı", shortDesc: "1584 yılında Mimar Sinan tarafından inşa edilen, İstanbul'un en eski ve ünlü hamamlarından biridir." },
+                    { name: "Cağaloğlu Hamamı", shortDesc: "1741 yılında inşa edilmiş, barok tarzı mimarisiyle dikkat çeken ve birçok ünlü ismi ağırlamış tarihi bir hamamdır." },
+                    { name: "Süleymaniye Hamamı", shortDesc: "Kanuni Sultan Süleyman tarafından Mimar Sinan'a yaptırılan Süleymaniye Külliyesi'nin bir parçasıdır ve muhteşem bir mimariye sahiptir." }
+                ]
+            },
+            "Lezzetli Türk Mutfağı": {
+                img: "https://placehold.co/800x500/98FB98/000000?text=Türk+Mutfağı+Detay",
+                description: "Türk mutfağı, Orta Asya, Orta Doğu, Balkan ve Akdeniz mutfaklarının zengin bir sentezi olarak dünyanın en çeşitli ve lezzetli mutfaklarından biridir. Et yemekleri (özellikle kebaplar ve köfteler), zeytinyağlı sebze yemekleri, hamur işleri (börekler, pideler), çorbalar, pilavlar ve tabii ki tatlılar (baklava, künefe, sütlaç gibi) Türk mutfağının temel taşlarıdır. Her bölgenin kendine özgü yöresel lezzetleri bulunmaktadır. İstanbul, bu zenginliğin bir araya geldiği bir gastronomi merkezidir. Geleneksel esnaf lokantalarından lüks restoranlara, sokak lezzetlerinden modern yorumlara kadar her damak zevkine uygun seçenekler sunar.",
+                mustTry: ["İskender Kebap", "Adana/Urfa Kebap", "Mantı", "Mercimek Çorbası", "Zeytinyağlı Enginar", "Yaprak Sarma", "Baklava", "Türk Kahvesi", "Ayran"],
+                restaurantTypes: [
+                    { name: "Esnaf Lokantaları", shortDesc: "Günlük, taze ve ev yapımı lezzetler sunan, uygun fiyatlı geleneksel lokantalar." },
+                    { name: "Meyhaneler", shortDesc: "Rakı eşliğinde çeşitli mezelerin, ara sıcakların ve ana yemeklerin tadını çıkarabileceğiniz, sohbetin ve müziğin ön planda olduğu mekanlar." },
+                    { name: "Balık Restoranları", shortDesc: "Özellikle Boğaz kenarında taze deniz ürünleri sunan, manzaralı restoranlar." },
+                    { name: "Kebapçılar", shortDesc: "Türkiye'nin dört bir yanından farklı kebap çeşitlerini bulabileceğiniz uzmanlaşmış restoranlar." }
+                ]
+            }
+        };
+
+        function showTurkishCultureDetailsPage(type) {
+            const data = turkishCultureData[type];
+            if (data && mainPageContent && turkishCultureDetailPage) {
+                mainPageContent.style.display = 'none';
+                let contentHTML = `<button id="backToMainCultureBtn" class="back-to-main-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>Geri Dön</button><h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">${type}</h2><div class="detail-page-content"><img src="${data.img}" alt="${type}" onerror="this.onerror=null;this.src='https://placehold.co/800x500/cccccc/ffffff?text=Resim+Bulunamadı';"><p>${data.description}</p>`;
+                
+                if (data.tips) {
+                    contentHTML += '<h4>İpuçları:</h4><ul>';
+                    data.tips.forEach(tip => { contentHTML += `<li>${tip}</li>`; });
+                    contentHTML += '</ul>';
+                }
+                if (data.examples) {
+                    contentHTML += '<h4>Örnek Mekanlar:</h4><ul class="list-none pl-0">';
+                    data.examples.forEach(ex => { contentHTML += `<li class="detail-example-item"><strong>${ex.name}:</strong> ${ex.shortDesc}</li>`; });
+                    contentHTML += '</ul>';
+                }
+                if (data.mustTry) {
+                    contentHTML += '<h4>Mutlaka Deneyin:</h4><ul>';
+                    data.mustTry.forEach(item => { contentHTML += `<li>${item}</li>`; });
+                    contentHTML += '</ul>';
+                }
+                if (data.restaurantTypes) {
+                    contentHTML += '<h4>Restoran Türleri:</h4><ul class="list-none pl-0">';
+                    data.restaurantTypes.forEach(rt => { contentHTML += `<li class="detail-example-item"><strong>${rt.name}:</strong> ${rt.shortDesc}</li>`; });
+                    contentHTML += '</ul>';
+                }
+
+                contentHTML += '</div>';
+                turkishCultureDetailPage.innerHTML = contentHTML;
+                turkishCultureDetailPage.style.display = 'block';
+                window.scrollTo(0, 0);
+                document.getElementById('backToMainCultureBtn').addEventListener('click', hideTurkishCultureDetailsPage);
+            }
+        }
+        function hideTurkishCultureDetailsPage() {
+            if (mainPageContent && turkishCultureDetailPage) { turkishCultureDetailPage.style.display = 'none'; turkishCultureDetailPage.innerHTML = ''; mainPageContent.style.display = 'block'; window.location.hash = '#turk-kulturu'; }
+        }
+
+
+        const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+        const allEvents = [ 
+            { date: "2025-05-24", title: "Topkapı Sarayı Turu", description: "Rehber eşliğinde Topkapı Sarayı'nı keşfedin.", time: "10:00 - 14:00", type: "diger" },
+            { date: "2025-05-24", title: "Boğazda Akşam Yemeği Turu", description: "İstanbul Boğazı'nda romantik bir akşam yemeği.", time: "19:00 - 22:00", type: "diger" },
+            { date: "2025-05-26", title: "Sema Gösterisi", description: "Mevlevi dervişlerinin büyüleyici sema gösterisi.", time: "20:00", type: "diger" },
+            { date: "2025-05-07", title: "Örnek Mayıs Etkinliği", description: "Mayıs ayına özel bir etkinlik.", time: "15:00", type: "diger" },
+            { date: "2025-06-01", title: "İstanbul Müzik Festivali Açılış Konseri", description: "Klasik müzik ziyafeti.", time: "20:30", type: "konser" },
+            { date: "2025-06-05", title: "Kapalı Çarşı Alışveriş Turu", description: "Tarihi Kapalı Çarşı'yı keşfedin.", time: "11:00 - 15:00", type: "diger" },
+            { date: "2025-05-25", title: "Caz Akşamı: Yıldızlar Altında", description: "Kadıköy Sahne'de canlı caz performansı.", time: "21:00", type: "konser" },
+            { date: "2025-05-25", title: "Klasik Türk Sineması: Muhsin Bey", description: "Atlas Sineması'nda nostaljik bir gösterim.", time: "19:00", type: "sinema" },
+            { date: "2025-05-27", title: "Modern Dans: Ritmin Büyüsü", description: "AKM'de çağdaş dans topluluğundan etkileyici bir performans.", time: "20:00", type: "bale" },
+            { date: "2025-05-28", title: "Fotoğraf Sergisi: İstanbul Sokakları", description: "Pera Müzesi'nde yerel sanatçıların gözünden İstanbul.", time: "10:00 - 18:00", type: "diger" },
+            { date: "2025-05-29", title: "Devlet Tiyatroları: Bir Yaz Gecesi Rüyası", description: "Harbiye Muhsin Ertuğrul Sahnesi'nde Shakespeare klasiği.", time: "20:30", type: "tiyatro" },
+            { date: "2025-05-30", title: "Senfoni Orkestrası: Bahar Melodileri", description: "CRR Konser Salonu'nda bahar temalı konser.", time: "20:00", type: "konser" },
+            { date: "2025-05-31", title: "Açık Hava Sineması: Amelie", description: "Maçka Parkı'nda keyifli bir film akşamı.", time: "21:30", type: "sinema" },
+            { date: "2025-06-02", title: "Opera Gecesi: La Traviata", description: "Süreyya Operası'nda Verdi'nin ölümsüz eseri.", time: "20:00", type: "opera" },
+            { date: "2025-06-03", title: "Bağımsız Film Festivali: Kısa Filmler", description: "Beyoğlu Sineması'nda ödüllü kısa filmler.", time: "18:00", type: "sinema" },
+            { date: "2025-06-04", title: "Stand-up Komedi Gecesi", description: "BKM Mutfak Çarşı'da kahkaha dolu bir akşam.", time: "21:00", type: "tiyatro" },
+            { date: "2025-06-06", title: "Rock Konseri: Anadolu Ezgileri", description: "Dorock XL Kadıköy'de yerli rock grupları.", time: "22:00", type: "konser" },
+            { date: "2025-06-07", title: "Çocuk Tiyatrosu: Masal Dünyası", description: "Haldun Taner Sahnesi'nde çocuklar için eğlenceli bir oyun.", time: "14:00", type: "tiyatro" },
+            { date: "2025-06-08", title: "Bale Gösterisi: Kuğu Gölü (Özet)", description: "Leyla Gencer Opera ve Sanat Merkezi'nde klasik bale.", time: "19:00", type: "bale" },
+            { date: "2025-06-09", title: "Belgesel Gösterimi: İstanbul'un Tarihi", description: "SALT Galata'da bilgilendirici bir belgesel.", time: "17:00", type: "sinema" },
+            { date: "2025-06-10", title: "Yerebatan Sarnıcı Akustik Konser", description: "Tarihi sarnıcın mistik atmosferinde akustik dinleti.", time: "21:00", type: "konser" },
+        ];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('fullCalendarContainer');
+            const eventsForDateDiv = document.getElementById('eventsForDate');
+            const eventListContainerTitle = document.querySelector('#eventListContainer h3');
+
+            if (calendarEl && eventsForDateDiv && eventListContainerTitle) {
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    locale: 'tr',
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    events: allEvents.map(event => ({
+                        title: event.title,
+                        start: event.date, 
+                        extendedProps: {
+                            description: event.description,
+                            time: event.time,
+                            type: event.type || 'diger' 
+                        },
+                        className: `event-${event.type || 'diger'}`
+                    })),
+                    dateClick: function(info) {
+                        showEventsForDateFC(info.dateStr, allEvents, eventsForDateDiv, eventListContainerTitle);
+                    },
+                    eventClick: function(info) {
+                        showEventsForDateFC(info.event.startStr, allEvents, eventsForDateDiv, eventListContainerTitle);
+                    },
+                    initialDate: '2025-05-24', 
+                });
+                calendar.render();
+
+                const initialRenderDate = calendar.getDate(); 
+                const initialDateStr = `${initialRenderDate.getFullYear()}-${String(initialRenderDate.getMonth() + 1).padStart(2, '0')}-${String(initialRenderDate.getDate()).padStart(2, '0')}`;
+                showEventsForDateFC(initialDateStr, allEvents, eventsForDateDiv, eventListContainerTitle);
+
+            } else {
+                console.error("FullCalendar için gerekli HTML elementleri bulunamadı.");
+            }
+        });
+
+        function showEventsForDateFC(dateString, sourceEvents, targetDiv, targetTitleEl) {
+            targetDiv.innerHTML = ''; 
+            const eventsOnDate = sourceEvents.filter(event => event.date === dateString);
+            
+            const dateParts = dateString.split('-');
+            const year = parseInt(dateParts[0]);
+            const monthIndex = parseInt(dateParts[1]) - 1; 
+            const day = parseInt(dateParts[2]);
+            
+            const displayMonthName = (typeof monthNames !== 'undefined' && monthNames[monthIndex]) ? monthNames[monthIndex] : (monthIndex + 1).toString();
+            const formattedDate = `${day} ${displayMonthName} ${year}`;
+            targetTitleEl.textContent = `${formattedDate} Etkinlikleri`;
+
+            if (eventsOnDate.length > 0) {
+                eventsOnDate.forEach(event => {
+                    const eventEl = document.createElement('div');
+                    eventEl.classList.add('event-item');
+                    eventEl.innerHTML = `
+                        <h4>${event.title}</h4>
+                        <p class="text-gray-600">${event.description || ''}</p>
+                        ${event.time ? `<p class="text-gray-500 text-xs mt-1">Saat: ${event.time}</p>` : ''}
+                    `;
+                    targetDiv.appendChild(eventEl);
+                });
+            } else {
+                targetDiv.innerHTML = `<p class="text-gray-500">Bu tarih için planlanmış etkinlik bulunmamaktadır.</p>`;
+            }
+        }
+
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('header nav a');
+        const mobileNavLinksMenu = document.querySelectorAll('#mobile-menu a');
+        // function changeNavOnScroll() { /* ... function code ... */ } 
+        // if (typeof window !== 'undefined' && typeof window.pageYOffset !== 'undefined') { 
+        //     window.addEventListener('scroll', changeNavOnScroll);
+        //     changeNavOnScroll(); 
+        // }
+    </script>
+</body>
+</html>
