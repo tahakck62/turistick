@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="tr"> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turistick</title>
+    <link rel="icon" href="assets/tour-guide.png" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .hero-bg {
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.pexels.com/photos/1549326/pexels-photo-1549326.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+            background-size: cover;
+            background-position: center;
+        }
+        .section-title {
+            @apply text-4xl font-bold text-center mb-10 text-gray-900;
+            font-size: 32px;     
+            font-weight: 700;    
+            text-align: center;  
+            margin-bottom: 20px; 
+            color: #1f2937;  
+        }
+        .card {
+            @apply bg-white rounded-xl shadow-lg overflow-hidden transform transition-all hover:scale-105;
+        }
+        .card-content {
+            @apply p-6;
+        }
+        .nav-link {
+            @apply px-3 py-2 text-gray-600 hover:text-blue-600 rounded-md transition-colors text-sm font-medium; 
+        }
+        .active-nav-link {
+            @apply px-3 py-2 text-blue-600 bg-blue-100 font-semibold rounded-md text-sm; 
+        }
+        #mobile-menu {
+            display: none;
+        }
+        .fare-calculator select, .fare-calculator input {
+            @apply w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow;
+        }
+        .fare-calculator button {
+            @apply w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold;
+        }
+        .fare-result {
+            @apply mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-center;
+        }
+        
+        .fc { 
+            @apply rounded-lg shadow-md border border-gray-200 bg-white;
+            max-width: 100%; 
+        }
+        .fc .fc-toolbar.fc-header-toolbar {
+            @apply mb-4 p-3 bg-gray-50 rounded-t-lg border-b border-gray-200; 
+        }
+        .fc .fc-toolbar-title {
+            @apply text-base sm:text-lg font-semibold text-gray-700; 
+        }
+        .fc .fc-button { 
+            @apply bg-blue-500 hover:bg-blue-600 text-white text-xs sm:text-sm px-3 py-1.5 rounded-md border-none shadow-sm;
+        }
+        .fc .fc-button-primary:disabled {
+            @apply bg-gray-300;
+        }
+        .fc .fc-button-group .fc-button {
+            @apply rounded-none;
+        }
+        .fc .fc-button-group .fc-button:first-child {
+            @apply rounded-l-md;
+        }
+        .fc .fc-button-group .fc-button:last-child {
+            @apply rounded-r-md;
+        }
+        .fc .fc-daygrid-day-number, .fc .fc-col-header-cell-cushion { 
+            @apply text-xs sm:text-sm text-gray-700;
+        }
+        .fc .fc-day-today { 
+            @apply bg-blue-50 !important; 
+        }
+         .fc-event { 
+            @apply bg-red-500 border-red-500 text-white p-1 text-xs rounded cursor-pointer;
+        }
+        .fc-event.event-konser { @apply bg-purple-500 border-purple-500; }
+        .fc-event.event-tiyatro { @apply bg-green-500 border-green-500; }
+        .fc-event.event-sinema { @apply bg-yellow-500 border-yellow-500 text-black; }
+        .fc-event.event-opera { @apply bg-pink-500 border-pink-500; }
+        .fc-event.event-bale { @apply bg-teal-500 border-teal-500; }
+        .fc-event.event-diger { @apply bg-indigo-500 border-indigo-500; }
+
+
+        .event-list {
+            @apply mt-6 md:mt-0 bg-white p-4 sm:p-6 rounded-lg shadow-md border border-gray-200;
+        }
+        .event-item {
+            @apply py-3 border-b border-gray-200 last:border-b-0;
+        }
+        .event-item h4 {
+            @apply text-base sm:text-lg font-semibold text-blue-700;
+        }
+        .event-item p {
+            @apply text-xs sm:text-sm;
+        }
+
+        .detail-page-container { 
+            @apply bg-white p-6 sm:p-10 rounded-lg shadow-xl my-8; 
+        }
+        .detail-page-content img {
+            @apply w-full h-72 sm:h-96 object-cover rounded-lg mb-6 shadow-md;
+            display: block; margin: 0 auto;
+        }
+         .detail-page-content h4 {
+            @apply text-xl font-semibold text-gray-700 mt-6 mb-2; 
+        }
+        .detail-page-content p {
+            @apply text-gray-600 mb-4 leading-relaxed text-base;
+        }
+        .detail-page-content ul {
+            @apply list-disc list-inside text-gray-600 mb-4 space-y-1 pl-5;
+        }
+        .detail-example-item { 
+            @apply mb-3 pb-3 border-b border-gray-200 last:border-b-0 last:pb-0;
+        }
+        .detail-example-item strong {
+            @apply text-gray-700;
+        }
+
+        .back-to-main-button {
+             @apply inline-flex items-center mb-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors shadow-md;
+        }
+        .back-to-main-button svg { /* SVG ikonlar için genel stil, gerekirse kullanılabilir */
+            @apply w-5 h-5 mr-2;
+        }
+        .language-selector {
+            @apply px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500; 
+        }
+        /* Abonelik Planları Stilleri */
+        #subscriptionDetailPage { 
+             @apply bg-white p-6 sm:p-10 rounded-lg shadow-xl my-8;
+        }
+        .subscription-plan {
+            @apply bg-gray-50 border border-gray-200 rounded-xl shadow-lg p-6 sm:p-8 text-center flex flex-col transition-all hover:shadow-2xl hover:scale-105;
+        }
+        .subscription-plan.popular { 
+            @apply border-2 border-blue-500 ring-4 ring-blue-500 ring-opacity-25;
+        }
+        .subscription-plan h3 {
+            @apply text-2xl sm:text-3xl font-bold text-gray-800 mb-3;
+        }
+        .subscription-plan .price {
+            @apply text-4xl sm:text-5xl font-extrabold text-blue-600 my-2;
+        }
+        .subscription-plan .price-period {
+            @apply text-sm text-gray-500 mb-6;
+        }
+        .subscription-plan ul {
+            @apply text-left space-y-3 text-gray-700 mb-8 flex-grow;
+        }
+        .subscription-plan ul li {
+            @apply flex items-start; 
+        }
+        .subscription-plan ul li svg {
+            @apply w-5 h-5 text-green-500 mr-2.5 flex-shrink-0 mt-0.5; 
+        }
+        .subscription-plan button {
+            @apply w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-md;
+        }
+        .subscription-plan.popular button {
+            @apply bg-blue-500 hover:bg-blue-600;
+        }
+
+        /* Ödeme Sayfası Stilleri */
+        #paymentPage {
+            @apply bg-white p-6 sm:p-10 rounded-lg shadow-xl my-8;
+        }
+        #paymentPage label {
+            @apply block text-sm font-medium text-gray-700 mb-1;
+        }
+        #paymentPage input[type="text"],
+        #paymentPage input[type="email"],
+        #paymentPage input[type="tel"],
+        #paymentPage select {
+            @apply mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm;
+        }
+        #paymentPage .card-details-grid {
+            @apply grid grid-cols-2 gap-4;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <header class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center"> 
+            <a href="#" class="text-xl sm:text-2xl font-bold text-blue-600" data-translate-key="siteTitle">Turistick</a>
+            <nav class="hidden md:flex items-center space-x-4"> 
+                <a href="#konaklama" class="nav-link" data-translate-key="navAccommodation">Konaklama</a>
+                <a href="#ulasim" class="nav-link" data-translate-key="navTransportation">Ulaşım</a>
+                <a href="#tarihi-mekanlar" class="nav-link" data-translate-key="navHistoricalPlaces">Tarihi Mekanlar</a>
+                <a href="#etkinlikler" class="nav-link" data-translate-key="navEvents">Etkinlikler</a>
+                <a href="#turk-kulturu" class="nav-link" data-translate-key="navTurkishCulture">Türk Kültürü</a>
+                <a href="#" onclick="showSubscriptionPage(event)" class="nav-link" data-translate-key="navSubscription">Abone Ol</a> 
+                <div class="ml-2"> 
+                    <select id="languageSelector" class="language-selector">
+                        <option value="tr">TR</option>
+                        <option value="en">EN</option>
+                    </select>
+                </div>
+            </nav>
+            <div class="md:hidden flex items-center">
+                <div class="mr-2">
+                     <select id="languageSelectorMobile" class="language-selector">
+                        <option value="tr">TR</option>
+                        <option value="en">EN</option>
+                    </select>
+                </div>
+                <button id="mobile-menu-button" class="text-gray-700 hover:text-blue-600 focus:outline-none p-2"> 
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden bg-white shadow-lg">
+            <a href="#konaklama" class="block px-6 py-3 text-gray-700 hover:bg-gray-100" data-translate-key="navAccommodationMobile">Konaklama</a>
+            <a href="#ulasim" class="block px-6 py-3 text-gray-700 hover:bg-gray-100" data-translate-key="navTransportationMobile">Ulaşım</a>
+            <a href="#tarihi-mekanlar" class="block px-6 py-3 text-gray-700 hover:bg-gray-100" data-translate-key="navHistoricalPlacesMobile">Tarihi Mekanlar</a>
+            <a href="#etkinlikler" class="block px-6 py-3 text-gray-700 hover:bg-gray-100" data-translate-key="navEventsMobile">Etkinlikler</a>
+            <a href="#turk-kulturu" class="block px-6 py-3 text-gray-700 hover:bg-gray-100" data-translate-key="navTurkishCultureMobile">Türk Kültürü</a>
+            <a href="#" onclick="showSubscriptionPage(event)" class="block px-6 py-3 text-gray-700 hover:bg-gray-100" data-translate-key="navSubscriptionMobile">Abone Ol</a> 
+        </div>
+    </header>
+
+    <section class="hero-bg h-96 flex items-center justify-center text-white">
+        <div class="text-center">
+            <h1 class="text-5xl font-bold mb-4" data-translate-key="heroTitle">İstanbul'u Keşfedin</h1>
+            <p class="text-xl" data-translate-key="heroSubtitle">Unutulmaz bir deneyim için rehberiniz.</p>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-6 py-12">
+        <div id="mainPageContent">
+            <section id="konaklama" class="py-12">
+                 <h2 class="section-title" data-translate-key="accommodationTitle">Konaklama Tavsiyeleri</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card">
+                        <img src="https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&dpr=1" alt="Lüks bir otel odası iç mekanı" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/E8A0BF/ffffff?text=Lüks+Otel';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800" data-translate-key="luxuryHotelsTitle">Lüks Oteller</h3>
+                            <p class="text-gray-600 mb-4" data-translate-key="luxuryHotelsDesc">Boğaz manzaralı, 5 yıldızlı konforun keyfini çıkarın.</p>
+                            <button onclick="showAccommodationDetailsPage('Lüks Oteller')" class="text-blue-600 hover:underline font-medium" data-translate-key="seeDetails">Detayları Gör</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img src="https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&dpr=1" alt="Şık dekore edilmiş butik otel odası" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/A0E8BF/ffffff?text=Butik+Otel';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800" data-translate-key="boutiqueHotelsTitle">Butik Oteller</h3>
+                            <p class="text-gray-600 mb-4" data-translate-key="boutiqueHotelsDesc">Tarihi yarımadada, otantik bir deneyim yaşayın.</p>
+                            <button onclick="showAccommodationDetailsPage('Butik Oteller')" class="text-blue-600 hover:underline font-medium" data-translate-key="seeDetails">Detayları Gör</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img src="https://images.pexels.com/photos/7535060/pexels-photo-7535060.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&dpr=1" alt="Modern ve ferah kiralık daire içi" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/BFA0E8/ffffff?text=Kiralık+Daire';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800" data-translate-key="rentalApartmentsTitle">Kiralık Daireler</h3>
+                            <p class="text-gray-600 mb-4" data-translate-key="rentalApartmentsDesc">Ev konforunda, şehrin kalbinde konaklayın.</p>
+                            <button onclick="showAccommodationDetailsPage('Kiralık Daireler')" class="text-blue-600 hover:underline font-medium" data-translate-key="seeDetails">Detayları Gör</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ulasim" class="py-12 bg-gray-100 -mx-6 px-6">
+                <h2 class="section-title" data-translate-key="transportationTitle">Ulaşım Bilgileri</h2>
+                <div class="grid md:grid-cols-2 gap-8 items-start">
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-800" data-translate-key="taxiTransportationTitle">Taksi ile Ulaşım</h3>
+                        <p class="text-gray-600 mb-4" data-translate-key="taxiTransportationDesc">İstanbul'da taksi bulmak kolaydır. Güvenilir duraklardan veya mobil uygulamalardan taksi çağırabilirsiniz. Taksimetrenin açık olduğundan emin olun.</p>
+                        <div class="fare-calculator mt-6 space-y-4">
+                            <h4 class="text-xl font-semibold mb-3 text-gray-700" data-translate-key="taxiFareCalculatorTitle">Tahmini Taksi Ücreti Hesaplayıcı</h4>
+                            <div>
+                                <label for="origin" class="block text-sm font-medium text-gray-700 mb-1" data-translate-key="fromLabel">Nereden:</label>
+                                <select id="origin" name="origin" class="bg-white"> 
+                                    <option value="" data-translate-key="selectOriginOption">Başlangıç noktası seçin</option>
+                                    <!-- Options will be populated by JavaScript -->
+                                </select>
+                            </div>
+                            <div>
+                                <label for="destination" class="block text-sm font-medium text-gray-700 mb-1" data-translate-key="toLabel">Nereye:</label>
+                                <select id="destination" name="destination" class="bg-white"> 
+                                    <option value="" data-translate-key="selectDestinationOption">Varış noktası seçin</option>
+                                     <!-- Options will be populated by JavaScript -->
+                                </select>
+                            </div>
+                            <button id="calculateFareBtn" class="mt-3" data-translate-key="calculateButton">Hesapla</button>
+                            <div id="fareResult" class="fare-result" style="display: none;"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-4" data-translate-key="taxiFareDisclaimer">*Bu hesaplama tahmini bir değerdir ve seçilen popüler noktalar arasındaki basitleştirilmiş mesafelere dayanmaktadır. Gerçek ücret trafik ve güzergaha göre değişiklik gösterebilir. <span data-translate-key="currentOpeningFee">Güncel açılış ücreti:</span> <span id="baseFareInfo">24.55</span> TL, <span data-translate-key="perKmFee">km başına ücret:</span> <span id="kmRateInfo">17.61</span> TL, <span data-translate-key="minFee">minimum ücret (indi-bindi):</span> <span id="minFareInfo">90</span> TL.</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-800" data-translate-key="publicTransportTitle">Toplu Taşıma</h3>
+                        <p class="text-gray-600 mb-4" data-translate-key="publicTransportDesc">İstanbul geniş bir toplu taşıma ağına sahiptir. İstanbulkart edinerek tüm toplu taşıma araçlarını kullanabilirsiniz.</p>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <svg class="w-6 h-6 text-blue-600 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 019 17.414V13H6a1 1 0 01-1-1V4a1 1 0 011-1zM5 5v6h4V5H5zm6 0v3.586l2.707 2.707a1 1 0 001.414-1.414L13 7.414V5h-2z" clip-rule="evenodd"></path></svg>
+                                <div>
+                                    <h4 class="font-semibold text-gray-700" data-translate-key="metroMarmarayTitle">Metro & Marmaray</h4>
+                                    <p class="text-gray-600 text-sm" data-translate-key="metroMarmarayDesc">Şehrin birçok noktasına hızlı ulaşım sağlar. Marmaray, Asya ve Avrupa yakalarını denizin altından birbirine bağlar.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-6 h-6 text-blue-600 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M3 3a1 1 0 000 2v8a1 1 0 001 1h1.586l1.707 1.707A1 1 0 008 16v-3h4v3a1 1 0 001.707-.707L15.414 14H17a1 1 0 001-1V5a1 1 0 000-2H3z"></path></svg>
+                                <div>
+                                    <h4 class="font-semibold text-gray-700" data-translate-key="busMetrobusTitle">Otobüs & Metrobüs</h4>
+                                    <p class="text-gray-600 text-sm" data-translate-key="busMetrobusDesc">Geniş güzergah ağı ile şehrin her yerine ulaşım imkanı. Metrobüs, kendine özel yolu sayesinde trafikten etkilenmez.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-6 h-6 text-blue-600 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm1 2a1 1 0 00-1 1v1h12V6a1 1 0 00-1-1H6zm0 4a1 1 0 00-1 1v1h12v-1a1 1 0 00-1-1H6zm0 4a1 1 0 00-1 1v1h12v-1a1 1 0 00-1-1H6z" clip-rule="evenodd"></path></svg>
+                                <div>
+                                    <h4 class="font-semibold text-gray-700" data-translate-key="ferrySeaBusTitle">Vapur & Deniz Otobüsü</h4>
+                                    <p class="text-gray-600 text-sm" data-translate-key="ferrySeaBusDesc">Boğaz'ın keyfini çıkararak iki yaka arasında seyahat edin. Adalar'a ulaşım için de idealdir.</p>
+                                </div>
+                            </li>
+                        </ul>
+                        <a href="https://www.metro.istanbul/" target="_blank" class="mt-4 inline-block text-blue-600 hover:underline font-medium" data-translate-key="metroIstanbulLink">Metro İstanbul Resmi Sitesi</a><br>
+                        <a href="https://www.iett.istanbul/" target="_blank" class="mt-1 inline-block text-blue-600 hover:underline font-medium" data-translate-key="iettLink">İETT Resmi Sitesi</a>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tarihi-mekanlar" class="py-12">
+                <h2 class="section-title" data-translate-key="historicalPlacesSectionTitle">Görülmesi Gereken Tarihi Mekanlar</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card">
+                        <img src="https://www.meroddi.com/wp-content/uploads/2022/06/ayasofyanin-gizemi.png" alt="Ayasofya Camii dış görünümü" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/FFC0CB/ffffff?text=Ayasofya';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800" data-translate-key="hagiaSophiaTitle">Ayasofya-i Kebir Cami-i Şerifi</h3>
+                            <p class="text-gray-600 mb-4" data-translate-key="hagiaSophiaDesc">Dünya mimarlık tarihinin en önemli anıtlarından biri.</p>
+                            <button onclick="showHistoricalPlaceDetailsPage('Ayasofya-i Kebir Cami-i Şerifi')" class="text-blue-600 hover:underline font-medium" data-translate-key="moreInfoButton">Daha Fazla Bilgi</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img src="https://perapalace.com/wp-content/uploads/2024/04/galata-kulesinin-tarihi-hikayesi.jpg" alt="Galata Kulesi ve İstanbul manzarası" class="w-full h-48 object-cover" onclick="showHistoricalPlaceDetailsPage('Galata Kulesi')" onerror="this.onerror=null;this.src='https://placehold.co/400x250/ADD8E6/ffffff?text=Galata+Kulesi';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800" data-translate-key="galataTowerTitle" onclick="showHistoricalPlaceDetailsPage('Galata Kulesi')">Galata Kulesi</h3>
+                            <p class="text-gray-600 mb-4" data-translate-key="galataTowerDesc">İstanbul'un 360 derecelik panoramik manzarası.</p>
+                            <button onclick="showHistoricalPlaceDetailsPage('Galata Kulesi')" class="text-blue-600 hover:underline font-medium" data-translate-key="moreInfoButton">Daha Fazla Bilgi</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img src="https://cdn.akkahotels.com/Uploads/Cms/kiz-kulesi.webp" alt="Kız Kulesi, İstanbul Boğazı'nda" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/90EE90/000000?text=Kız+Kulesi';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800" data-translate-key="maidensTowerTitle">Kız Kulesi</h3>
+                            <p class="text-gray-600 mb-4" data-translate-key="maidensTowerDesc">Boğaz'ın ortasında, efsanelere konu olmuş yapı.</p>
+                            <button onclick="showHistoricalPlaceDetailsPage('Kız Kulesi')" class="text-blue-600 hover:underline font-medium" data-translate-key="moreInfoButton">Daha Fazla Bilgi</button>
+                        </div>
+                    </div>
+                     <div class="card">
+                        <img src="https://cdn.akkahotels.com/Uploads/Blog/topkapi-sarayi-istanbul_4.webp" alt="Topkapı Sarayı'nın genel görünümü" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/FFFFE0/000000?text=Topkapı+Sarayı';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800" data-translate-key="topkapiPalaceTitle">Topkapı Sarayı</h3>
+                            <p class="text-gray-600 mb-4" data-translate-key="topkapiPalaceDesc">Osmanlı İmparatorluğu'nun kalbi.</p>
+                            <button onclick="showHistoricalPlaceDetailsPage('Topkapı Sarayı')" class="text-blue-600 hover:underline font-medium" data-translate-key="moreInfoButton">Daha Fazla Bilgi</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="etkinlikler" class="py-12 bg-gray-100 -mx-6 px-6">
+                <h2 class="section-title" data-translate-key="dailyEventsCalendarTitle">Günlük Etkinlik Takvimi</h2>
+                <div class="grid md:grid-cols-3 gap-8 items-start">
+                    <div id="fullCalendarContainer" class="calendar md:col-span-2">
+                        </div>
+                    <div id="eventListContainer" class="event-list md:col-span-1">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700" data-translate-key="selectedDayEventsTitle">Seçili Günün Etkinlikleri</h3>
+                        <div id="eventsForDate">
+                            <p class="text-gray-500" data-translate-key="selectDayPrompt">Lütfen takvimden bir gün seçin.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="turk-kulturu" class="py-12">
+                <h2 class="section-title" data-translate-key="experienceTurkishCultureTitle">Türk Kültürünü Deneyimleyin</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="card">
+                        <img src="https://cdn1.ntv.com.tr/gorsel/FCqNsPfeWEukeCAMeEXlsg.jpg?width=1000&mode=both&scale=both&v=1536917019993" alt="Tarihi bir Türk hamamının içinden görünüm" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/FFDAB9/000000?text=Türk+Hamamı';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800" data-translate-key="turkishBathsTitle">Tarihi Türk Hamamları</h3>
+                            <p class="text-gray-600 mb-4" data-translate-key="turkishBathsDesc">Geleneksel Türk hamamı deneyimiyle rahatlayın ve yenilenin.</p>
+                            <button onclick="showTurkishCultureDetailsPage('Tarihi Türk Hamamları')" class="text-blue-600 hover:underline font-medium" data-translate-key="moreInfoButton">Daha Fazla Bilgi</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img src="https://i.tgrthaber.com/images/haberler/2022_01/xbuyuk/turk-mutfagi-abd-de-damga-vurdu-birbirinde-lezzetli-yemekler-sunuldu-1642228291.jpg" alt="Çeşitli Türk mezeleri ve kebap sunumu" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x250/98FB98/000000?text=Türk+Mutfağı';">
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800" data-translate-key="turkishCuisineTitle">Lezzetli Türk Mutfağı</h3>
+                            <p class="text-gray-600 mb-4" data-translate-key="turkishCuisineDesc">Kebaplardan mezelere, tatlılardan yöresel lezzetlere kadar zengin Türk mutfağını keşfedin.</p>
+                             <button onclick="showTurkishCultureDetailsPage('Lezzetli Türk Mutfağı')" class="text-blue-600 hover:underline font-medium" data-translate-key="moreInfoButton">Daha Fazla Bilgi</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            </div> 
+        <div id="accommodationDetailPage" class="hidden detail-page-container">
+            </div>
+        <div id="historicalPlaceDetailPage" class="hidden detail-page-container">
+            </div>
+        <div id="turkishCultureDetailPage" class="hidden detail-page-container"> 
+            </div>
+        
+        <div id="subscriptionDetailPage" class="hidden detail-page-container">
+            <button id="backToMainFromSubscriptionBtn" class="back-to-main-button">
+                <span data-translate-key="backButton">Geri Dön</span>
+            </button>
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-10 text-center" data-translate-key="subscriptionPlansTitle">Abonelik Planları</h2>
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="subscription-plan">
+                    <h3 data-translate-key="basicPlanTitle">Temel Plan</h3>
+                    <div class="price" data-translate-key="basicPlanPrice">Ücretsiz</div>
+                    <p class="price-period" data-translate-key="basicPlanPeriod"></p> 
+                    <ul>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> <span data-translate-key="basicPlanFeature1">Sınırlı içerik erişimi</span></li>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> <span data-translate-key="basicPlanFeature2">Standart etkinlik takvimi</span></li>
+                    </ul>
+                    <button data-translate-key="selectPlanButton" onclick="showPaymentPage('basicPlanTitle', 'Ücretsiz')">Planı Seç</button>
+                </div>
+                <div class="subscription-plan popular">
+                    <div class="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 px-3 py-1 text-sm text-white bg-blue-500 rounded-full" data-translate-key="popularBadge">Popüler</div>
+                    <h3 data-translate-key="premiumPlanTitle">Premium Plan</h3>
+                    <div class="price">₺199</div>
+                    <p class="price-period" data-translate-key="premiumPlanPeriod">/ aylık</p>
+                    <ul>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> <span data-translate-key="premiumPlanFeature1">Tüm içeriklere tam erişim</span></li>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> <span data-translate-key="premiumPlanFeature2">Özel etkinlik bildirimleri</span></li>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> <span data-translate-key="premiumPlanFeature3">Detaylı şehir rehberleri</span></li>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> <span data-translate-key="premiumPlanFeature4">Reklamsız deneyim</span></li>
+                    </ul>
+                    <button data-translate-key="selectPlanButton" onclick="showPaymentPage('premiumPlanTitle', '₺199')">Planı Seç</button>
+                </div>
+                <div class="subscription-plan">
+                    <h3 data-translate-key="annualPlanTitle">Yıllık Plan</h3>
+                    <div class="price">₺1999</div>
+                    <p class="price-period" data-translate-key="annualPlanPeriod">/ yıllık</p>
+                    <ul>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> <span data-translate-key="annualPlanFeature1">Tüm Premium özellikler</span></li>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> <span data-translate-key="annualPlanFeature2">Öncelikli destek</span></li>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> <span data-translate-key="annualPlanFeature3">2 ay ücretsiz</span></li>
+                    </ul>
+                    <button data-translate-key="selectPlanButton" onclick="showPaymentPage('annualPlanTitle', '₺1999')">Planı Seç</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="paymentPage" class="hidden detail-page-container">
+            <button id="backToSubscriptionPageBtn" class="back-to-main-button"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                <span data-translate-key="backToPlansButton">Planlara Geri Dön</span>
+            </button>
+            <h2 class="text-3xl font-bold text-gray-800 mb-6" data-translate-key="paymentPageTitle">Ödeme Bilgileri</h2>
+            <p class="mb-4 text-gray-600" data-translate-key="selectedPlanInfo">Seçilen Plan: <span id="selectedPlanName" class="font-semibold"></span> - <span id="selectedPlanPrice" class="font-semibold"></span></p>
+            
+            <form id="paymentForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="fullName" data-translate-key="fullNameLabel">Ad Soyad</label>
+                        <input type="text" id="fullName" name="fullName" required>
+                    </div>
+                    <div>
+                        <label for="email" data-translate-key="emailLabel">E-posta Adresi</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label for="cardNumber" data-translate-key="cardNumberLabel">Kart Numarası</label>
+                    <input type="text" id="cardNumber" name="cardNumber" placeholder="•••• •••• •••• ••••" required>
+                </div>
+
+                <div class="card-details-grid mb-6">
+                    <div>
+                        <label for="expiryDate" data-translate-key="expiryDateLabel">Son Kullanma Tarihi (AA/YY)</label>
+                        <input type="text" id="expiryDate" name="expiryDate" placeholder="AA/YY" required>
+                    </div>
+                    <div>
+                        <label for="cvv" data-translate-key="cvvLabel">CVV</label>
+                        <input type="text" id="cvv" name="cvv" placeholder="•••" required>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="cardHolderName" data-translate-key="cardHolderNameLabel">Kart Sahibinin Adı</label>
+                    <input type="text" id="cardHolderName" name="cardHolderName" required>
+                </div>
+
+                <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors" data-translate-key="completePaymentButton">Ödemeyi Tamamla</button>
+            </form>
+            <p class="text-xs text-gray-500 mt-4 text-center" data-translate-key="paymentDisclaimer">Bu sayfa bir simülasyondur. Gerçek bir ödeme işlemi yapılmamaktadır.</p>
+        </div>
+
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center py-8">
+        <p>&copy; <span id="currentYear"></span> <span data-translate-key="footerSiteName">İstanbul Turist Rehberi</span>. <span data-translate-key="footerRightsReserved">Tüm hakları saklıdır.</span></p>
+        <p class="text-sm text-gray-400" data-translate-key="footerMadeWithLove">Sevgiyle hazırlandı.</p>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script>
+        // Dil çevirileri
+        const translations = {
+            "siteTitle": { "tr": "Turistick", "en": "Turistick" },
+            "navAccommodation": { "tr": "Konaklama", "en": "Accommodation" },
+            "navTransportation": { "tr": "Ulaşım", "en": "Transportation" },
+            "navHistoricalPlaces": { "tr": "Tarihi Mekanlar", "en": "Historical Places" },
+            "navEvents": { "tr": "Etkinlikler", "en": "Events" },
+            "navTurkishCulture": { "tr": "Türk Kültürü", "en": "Turkish Culture" },
+            "navSubscription": { "tr": "Abone Ol", "en": "Subscribe" }, 
+            "navAccommodationMobile": { "tr": "Konaklama", "en": "Accommodation" },
+            "navTransportationMobile": { "tr": "Ulaşım", "en": "Transportation" },
+            "navHistoricalPlacesMobile": { "tr": "Tarihi Mekanlar", "en": "Historical Places" },
+            "navEventsMobile": { "tr": "Etkinlikler", "en": "Events" },
+            "navTurkishCultureMobile": { "tr": "Türk Kültürü", "en": "Turkish Culture" },
+            "navSubscriptionMobile": { "tr": "Abone Ol", "en": "Subscribe" }, 
+            "heroTitle": { "tr": "İstanbul'u Keşfedin", "en": "Discover Istanbul" },
+            "heroSubtitle": { "tr": "Unutulmaz bir deneyim için rehberiniz.", "en": "Your guide for an unforgettable experience." },
+            "accommodationTitle": { "tr": "Konaklama Tavsiyeleri", "en": "Accommodation Recommendations" },
+            "luxuryHotelsTitle": { "tr": "Lüks Oteller", "en": "Luxury Hotels" },
+            "luxuryHotelsDesc": { "tr": "Boğaz manzaralı, 5 yıldızlı konforun keyfini çıkarın.", "en": "Enjoy 5-star comfort with Bosphorus views." },
+            "boutiqueHotelsTitle": { "tr": "Butik Oteller", "en": "Boutique Hotels" },
+            "boutiqueHotelsDesc": { "tr": "Tarihi yarımadada, otantik bir deneyim yaşayın.", "en": "Experience an authentic stay in the historical peninsula." },
+            "rentalApartmentsTitle": { "tr": "Kiralık Daireler", "en": "Rental Apartments" },
+            "rentalApartmentsDesc": { "tr": "Ev konforunda, şehrin kalbinde konaklayın.", "en": "Stay in the heart of the city with home comfort." },
+            "seeDetails": { "tr": "Detayları Gör", "en": "See Details" },
+            "transportationTitle": { "tr": "Ulaşım Bilgileri", "en": "Transportation Information" },
+            "taxiTransportationTitle": { "tr": "Taksi ile Ulaşım", "en": "Transportation by Taxi" },
+            "taxiTransportationDesc": { "tr": "İstanbul'da taksi bulmak kolaydır. Güvenilir duraklardan veya mobil uygulamalardan taksi çağırabilirsiniz. Taksimetrenin açık olduğundan emin olun.", "en": "Finding a taxi in Istanbul is easy. You can call a taxi from reliable taxi stands or mobile applications. Make sure the taximeter is on." },
+            "taxiFareCalculatorTitle": { "tr": "Tahmini Taksi Ücreti Hesaplayıcı", "en": "Estimated Taxi Fare Calculator" },
+            "fromLabel": { "tr": "Nereden:", "en": "From:" },
+            "toLabel": { "tr": "Nereye:", "en": "To:" },
+            "selectOriginOption": { "tr": "Başlangıç noktası seçin", "en": "Select origin" },
+            "selectDestinationOption": { "tr": "Varış noktası seçin", "en": "Select destination" },
+            "calculateButton": { "tr": "Hesapla", "en": "Calculate" },
+            "taxiFareDisclaimer": { "tr": "*Bu hesaplama tahmini bir değerdir ve seçilen popüler noktalar arasındaki basitleştirilmiş mesafelere dayanmaktadır. Gerçek ücret trafik ve güzergaha göre değişiklik gösterebilir.", "en": "*This calculation is an estimate and is based on simplified distances between selected popular points. The actual fare may vary depending on traffic and route." },
+            "currentOpeningFee": {"tr": "Güncel açılış ücreti:", "en": "Current opening fee:"},
+            "perKmFee": {"tr": "km başına ücret:", "en": "Fee per km:"},
+            "minFee": {"tr": "minimum ücret (indi-bindi):", "en": "Minimum fare (short ride):"},
+            "publicTransportTitle": { "tr": "Toplu Taşıma", "en": "Public Transportation" },
+            "publicTransportDesc": { "tr": "İstanbul geniş bir toplu taşıma ağına sahiptir. İstanbulkart edinerek tüm toplu taşıma araçlarını kullanabilirsiniz.", "en": "Istanbul has an extensive public transportation network. You can use all public transport vehicles by obtaining an Istanbulkart." },
+            "metroMarmarayTitle": { "tr": "Metro & Marmaray", "en": "Metro & Marmaray" },
+            "metroMarmarayDesc": { "tr": "Şehrin birçok noktasına hızlı ulaşım sağlar. Marmaray, Asya ve Avrupa yakalarını denizin altından birbirine bağlar.", "en": "Provides fast transportation to many parts of the city. Marmaray connects the Asian and European sides under the sea." },
+            "busMetrobusTitle": { "tr": "Otobüs & Metrobüs", "en": "Bus & Metrobus" },
+            "busMetrobusDesc": { "tr": "Geniş güzergah ağı ile şehrin her yerine ulaşım imkanı. Metrobüs, kendine özel yolu sayesinde trafikten etkilenmez.", "en": "Access to all parts of the city with a wide route network. Metrobus is not affected by traffic thanks to its dedicated lane." },
+            "ferrySeaBusTitle": { "tr": "Vapur & Deniz Otobüsü", "en": "Ferry & Sea Bus" },
+            "ferrySeaBusDesc": { "tr": "Boğaz'ın keyfini çıkararak iki yaka arasında seyahat edin. Adalar'a ulaşım için de idealdir.", "en": "Travel between the two continents enjoying the Bosphorus. It is also ideal for transportation to the Princes' Islands." }, 
+            "metroIstanbulLink": { "tr": "Metro İstanbul Resmi Sitesi", "en": "Metro Istanbul Official Site" },
+            "iettLink": { "tr": "İETT Resmi Sitesi", "en": "IETT Official Site" },
+            "historicalPlacesSectionTitle": { "tr": "Görülmesi Gereken Tarihi Mekanlar", "en": "Must-See Historical Places" },
+            "hagiaSophiaTitle": { "tr": "Ayasofya-i Kebir Cami-i Şerifi", "en": "Hagia Sophia Grand Mosque" },
+            "hagiaSophiaDesc": { "tr": "Dünya mimarlık tarihinin en önemli anıtlarından biri.", "en": "One of the most important monuments in the history of world architecture." },
+            "galataTowerTitle": { "tr": "Galata Kulesi", "en": "Galata Tower" },
+            "galataTowerDesc": { "tr": "İstanbul'un 360 derecelik panoramik manzarası.", "en": "360-degree panoramic view of Istanbul." },
+            "maidensTowerTitle": { "tr": "Kız Kulesi", "en": "Maiden's Tower" },
+            "maidensTowerDesc": { "tr": "Boğaz'ın ortasında, efsanelere konu olmuş yapı.", "en": "A legendary structure in the middle of the Bosphorus." },
+            "topkapiPalaceTitle": { "tr": "Topkapı Sarayı", "en": "Topkapi Palace" },
+            "topkapiPalaceDesc": { "tr": "Osmanlı İmparatorluğu'nun kalbi.", "en": "The heart of the Ottoman Empire." },
+            "moreInfoButton": { "tr": "Daha Fazla Bilgi", "en": "More Info" },
+            "dailyEventsCalendarTitle": { "tr": "Günlük Etkinlik Takvimi", "en": "Daily Events Calendar" },
+            "selectedDayEventsTitle": { "tr": "Seçili Günün Etkinlikleri", "en": "Events of the Selected Day" },
+            "selectDayPrompt": { "tr": "Lütfen takvimden bir gün seçin.", "en": "Please select a day from the calendar." },
+            "noEventsForThisDate": { "tr": "Bu tarih için planlanmış etkinlik bulunmamaktadır.", "en": "There are no scheduled events for this date." },
+            "experienceTurkishCultureTitle": { "tr": "Türk Kültürünü Deneyimleyin", "en": "Experience Turkish Culture" },
+            "turkishBathsTitle": { "tr": "Tarihi Türk Hamamları", "en": "Historical Turkish Baths" },
+            "turkishBathsDesc": { "tr": "Geleneksel Türk hamamı deneyimiyle rahatlayın ve yenilenin.", "en": "Relax and rejuvenate with a traditional Turkish bath experience." },
+            "turkishCuisineTitle": { "tr": "Lezzetli Türk Mutfağı", "en": "Delicious Turkish Cuisine" },
+            "turkishCuisineDesc": { "tr": "Kebaplardan mezelere, tatlılardan yöresel lezzetlere kadar zengin Türk mutfağını keşfedin.", "en": "Discover the rich Turkish cuisine, from kebabs to mezes, desserts to regional delicacies." },
+            "footerSiteName": { "tr": "İstanbul Turist Rehberi", "en": "Istanbul Tourist Guide" },
+            "footerRightsReserved": { "tr": "Tüm hakları saklıdır.", "en": "All rights reserved." },
+            "footerMadeWithLove": { "tr": "Sevgiyle hazırlandı.", "en": "Made with love." },
+            "backButton": { "tr": "Geri Dön", "en": "Go Back" }, 
+            "featuredFeatures": { "tr": "Öne Çıkan Özellikler:", "en": "Featured Features:" },
+            "exampleAccommodations": { "tr": "Örnek Konaklama Yerleri:", "en": "Example Accommodations:" },
+            "estimatedPriceRange": { "tr": "Fiyat Aralığı (Tahmini):", "en": "Estimated Price Range:" },
+            "visitingInfoLabel": {"tr": "Ziyaret Bilgileri:", "en": "Visiting Information:"},
+            "tipsLabel": {"tr": "İpuçları:", "en": "Tips:"},
+            "exampleVenuesLabel": {"tr": "Örnek Mekanlar:", "en": "Example Venues:"},
+            "mustTryLabel": {"tr": "Mutlaka Deneyin:", "en": "Must Try:"},
+            "restaurantTypesLabel": {"tr": "Restoran Türleri:", "en": "Restaurant Types:"},
+            "fareCalcErrorOriginDest": {"tr": "Lütfen hem başlangıç hem de varış noktası seçin.", "en": "Please select both origin and destination."},
+            "fareCalcErrorSamePoint": {"tr": "Aynı noktayı seçtiniz. Tahmini ücret: {minFare} TL (Minimum indi-bindi ücreti uygulanır).", "en": "You selected the same point. Estimated fare: {minFare} TL (Minimum short ride fee applies)."}, 
+            "fareCalcErrorNoDistance": {"tr": "Seçilen konumlar arasında mesafe bilgisi bulunamadı. Lütfen farklı konumlar deneyin.", "en": "Distance information could not be found between the selected locations. Please try different locations."},
+            "fareCalcResult": {"tr": "Tahmini Ücret ({origin} - {destination}, ~{distance} km): {fare} TL", "en": "Estimated Fare ({origin} - {destination}, ~{distance} km): {fare} TL"}, 
+            "locationTaksim": { "tr": "Taksim Meydanı", "en": "Taksim Square" },
+            "locationSultanahmet": { "tr": "Sultanahmet Camii", "en": "Sultanahmet Mosque" },
+            "locationKadikoy": { "tr": "Kadıköy İskelesi", "en": "Kadikoy Pier" },
+            "locationBesiktas": { "tr": "Beşiktaş Çarşı", "en": "Besiktas Bazaar" },
+            "locationISTAirport": { "tr": "İstanbul Havalimanı (IST)", "en": "Istanbul Airport (IST)" },
+            "locationSAWAirport": { "tr": "Sabiha Gökçen Havalimanı (SAW)", "en": "Sabiha Gokcen Airport (SAW)" },
+            "locationGalataport": { "tr": "Galataport", "en": "Galataport" },
+            "locationEminonu": { "tr": "Eminönü", "en": "Eminonu" },
+            "locationOrtakoy": { "tr": "Ortaköy", "en": "Ortakoy" },
+            "locationNisantasi": { "tr": "Nişantaşı", "en": "Nisantasi" },
+            // Abonelik ve Ödeme Sayfası Çevirileri
+            "subscriptionPlansTitle": { "tr": "Abonelik Planları", "en": "Subscription Plans" },
+            "basicPlanTitle": { "tr": "Temel Plan", "en": "Basic Plan" },
+            "basicPlanPrice": { "tr": "Ücretsiz", "en": "Free" },
+            "basicPlanPeriod": { "tr": "", "en": "" },
+            "basicPlanFeature1": { "tr": "Sınırlı içerik erişimi", "en": "Limited content access" },
+            "basicPlanFeature2": { "tr": "Standart etkinlik takvimi", "en": "Standard event calendar" },
+            "selectPlanButton": { "tr": "Planı Seç", "en": "Select Plan" },
+            "popularBadge": { "tr": "Popüler", "en": "Popular" },
+            "premiumPlanTitle": { "tr": "Premium Plan", "en": "Premium Plan" },
+            "premiumPlanPeriod": { "tr": "/ aylık", "en": "/ monthly" },
+            "premiumPlanFeature1": { "tr": "Tüm içeriklere tam erişim", "en": "Full access to all content" },
+            "premiumPlanFeature2": { "tr": "Özel etkinlik bildirimleri", "en": "Special event notifications" },
+            "premiumPlanFeature3": { "tr": "Detaylı şehir rehberleri", "en": "Detailed city guides" },
+            "premiumPlanFeature4": { "tr": "Reklamsız deneyim", "en": "Ad-free experience" },
+            "annualPlanTitle": { "tr": "Yıllık Plan", "en": "Annual Plan" },
+            "annualPlanPeriod": { "tr": "/ yıllık", "en": "/ yearly" },
+            "annualPlanFeature1": { "tr": "Tüm Premium özellikler", "en": "All Premium features" },
+            "annualPlanFeature2": { "tr": "Öncelikli destek", "en": "Priority support" },
+            "annualPlanFeature3": { "tr": "2 ay ücretsiz", "en": "2 months free" },
+            "paymentPageTitle": { "tr": "Ödeme Bilgileri", "en": "Payment Information" },
+            "selectedPlanInfo": { "tr": "Seçilen Plan: ", "en": "Selected Plan: " },
+            "fullNameLabel": { "tr": "Ad Soyad", "en": "Full Name" },
+            "emailLabel": { "tr": "E-posta Adresi", "en": "Email Address" },
+            "cardNumberLabel": { "tr": "Kart Numarası", "en": "Card Number" },
+            "expiryDateLabel": { "tr": "Son Kullanma Tarihi (AA/YY)", "en": "Expiry Date (MM/YY)" },
+            "cvvLabel": { "tr": "CVV", "en": "CVV" },
+            "cardHolderNameLabel": { "tr": "Kart Sahibinin Adı", "en": "Cardholder Name" },
+            "completePaymentButton": { "tr": "Ödemeyi Tamamla", "en": "Complete Payment" },
+            "paymentDisclaimer": { "tr": "Bu sayfa bir simülasyondur. Gerçek bir ödeme işlemi yapılmamaktadır.", "en": "This page is a simulation. No real payment transaction is made." },
+            "backToPlansButton": { "tr": "Planlara Geri Dön", "en": "Back to Plans" }
+        };
+
+        let currentLanguage = 'tr'; 
+
+        function applyTranslations(lang) {
+            currentLanguage = lang;
+            document.documentElement.lang = lang; 
+            document.querySelectorAll('[data-translate-key]').forEach(element => {
+                const key = element.getAttribute('data-translate-key');
+                if (translations[key] && translations[key][lang]) {
+                    element.textContent = translations[key][lang];
+                }
+            });
+            
+            const langSelector = document.getElementById('languageSelector');
+            const langSelectorMobile = document.getElementById('languageSelectorMobile');
+            if (langSelector) langSelector.value = lang;
+            if (langSelectorMobile) langSelectorMobile.value = lang;
+
+            // Populate taxi fare calculator dropdowns with translated location names
+            if (typeof populateLocationDropdowns === 'function') {
+                 populateLocationDropdowns();
+            }
+            
+            if (typeof calendarInstance !== 'undefined' && calendarInstance) {
+                calendarInstance.setOption('locale', lang);
+                // Update calendar button texts
+                calendarInstance.setOption('buttonText', {
+                    today: translations.todayButton ? (translations.todayButton[lang] || 'Today') : (lang === 'tr' ? 'Bugün' : 'Today'),
+                    month: translations.monthButton ? (translations.monthButton[lang] || 'Month') : (lang === 'tr' ? 'Ay' : 'Month'),
+                    week: translations.weekButton ? (translations.weekButton[lang] || 'Week') : (lang === 'tr' ? 'Hafta' : 'Week'),
+                    day: translations.dayButton ? (translations.dayButton[lang] || 'Day') : (lang === 'tr' ? 'Gün' : 'Day'),
+                    list: translations.listButton ? (translations.listButton[lang] || 'List') : (lang === 'tr' ? 'Liste' : 'List')
+                });
+                updateFullCalendarEvents(lang);
+            }
+            if(document.getElementById('accommodationDetailPage').style.display !== 'none'){
+                const currentTypeH2 = document.querySelector('#accommodationDetailPage h2');
+                if (currentTypeH2) {
+                    const currentType = currentTypeH2.textContent; 
+                    const originalTypeKey = Object.keys(accommodationData).find(key => 
+                        (accommodationData[key].tr_title === currentType || accommodationData[key].en_title === currentType) || key === currentType
+                    );
+                    if(originalTypeKey) showAccommodationDetailsPage(originalTypeKey);
+                }
+            }
+            if(document.getElementById('historicalPlaceDetailPage').style.display !== 'none'){
+                 const currentTitleH2 = document.querySelector('#historicalPlaceDetailPage h2');
+                 if (currentTitleH2) {
+                    const currentTitle = currentTitleH2.textContent;
+                    const originalTitleKey = Object.keys(historicalPlacesData).find(key => 
+                        (historicalPlacesData[key].tr_title === currentTitle || historicalPlacesData[key].en_title === currentTitle) || key === currentTitle
+                    );
+                    if(originalTitleKey) showHistoricalPlaceDetailsPage(originalTitleKey);
+                 }
+            }
+             if(document.getElementById('turkishCultureDetailPage').style.display !== 'none'){
+                const currentTitleH2 = document.querySelector('#turkishCultureDetailPage h2');
+                if (currentTitleH2) {
+                    const currentTitle = currentTitleH2.textContent;
+                    const originalTitleKey = Object.keys(turkishCultureData).find(key => 
+                        (turkishCultureData[key].tr_title === currentTitle || turkishCultureData[key].en_title === currentTitle) || key === currentType
+                    );
+                    if(originalTitleKey) showTurkishCultureDetailsPage(originalTitleKey);
+                }
+            }
+             if(document.getElementById('paymentPage').style.display !== 'none'){
+                const planNameEl = document.getElementById('selectedPlanName');
+                if(planNameEl && planNameEl.dataset.key ){ 
+                    planNameEl.textContent = translations[planNameEl.dataset.key] ? (translations[planNameEl.dataset.key][currentLanguage] || planNameEl.dataset.key) : planNameEl.dataset.key;
+                 }
+            }
+            const subscriptionPageTitle = document.querySelector('#subscriptionDetailPage h2[data-translate-key="subscriptionPlansTitle"]');
+            if (subscriptionPageTitle && translations.subscriptionPlansTitle && translations.subscriptionPlansTitle[lang]) {
+                subscriptionPageTitle.textContent = translations.subscriptionPlansTitle[lang];
+            }
+        }
+
+
+        // Mobil menü toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.style.display = mobileMenu.style.display === 'block' ? 'none' : 'block';
+            });
+        }
+
+        const navLinksAll = document.querySelectorAll('#mobile-menu a, header nav a');
+        navLinksAll.forEach(link => {
+            link.addEventListener('click', (event) => {
+                if (mobileMenu && mobileMenu.style.display === 'block') {
+                    mobileMenu.style.display = 'none';
+                }
+                const href = link.getAttribute('href');
+                if (href && href.startsWith('#') && link.getAttribute('onclick') !== 'showSubscriptionPage(event)') {
+                    if (document.getElementById('accommodationDetailPage').style.display !== 'none') hideAccommodationDetailsPage();
+                    if (document.getElementById('historicalPlaceDetailPage').style.display !== 'none') hideHistoricalPlaceDetailsPage();
+                    if (document.getElementById('turkishCultureDetailPage').style.display !== 'none') hideTurkishCultureDetailsPage();
+                    if (document.getElementById('paymentPage').style.display !== 'none') hidePaymentPage();
+                    if (document.getElementById('subscriptionDetailPage').style.display !== 'none') hideSubscriptionPage();
+                    
+                    if(mainPageContent) mainPageContent.style.display = 'block';
+
+                    setTimeout(() => {
+                        const targetElement = document.querySelector(href);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }, 50); 
+                }
+            });
+        });
+
+        // Taksi ücreti hesaplayıcı
+        const calculateFareBtn = document.getElementById('calculateFareBtn');
+        const originSelect = document.getElementById('origin');
+        const destinationSelect = document.getElementById('destination');
+        const fareResultDiv = document.getElementById('fareResult');
+        const baseFareInfoEl = document.getElementById('baseFareInfo');
+        const kmRateInfoEl = document.getElementById('kmRateInfo');
+        const minFareInfoEl = document.getElementById('minFareInfo');
+
+        if (baseFareInfoEl && kmRateInfoEl && minFareInfoEl && originSelect && destinationSelect && calculateFareBtn && fareResultDiv){
+            const baseFare = parseFloat(baseFareInfoEl.textContent);
+            const perKmRate = parseFloat(kmRateInfoEl.textContent);
+            const minFare = parseFloat(minFareInfoEl.textContent);
+            
+            const locations = [ 
+                { id: "taksim", nameKey: "locationTaksim" }, 
+                { id: "sultanahmet", nameKey: "locationSultanahmet" }, 
+                { id: "kadikoy", nameKey: "locationKadikoy" }, 
+                { id: "besiktas", nameKey: "locationBesiktas" }, 
+                { id: "ISTAirport", nameKey: "locationISTAirport" }, 
+                { id: "SAWAirport", nameKey: "locationSAWAirport" }, 
+                { id: "galataport", nameKey: "locationGalataport" }, 
+                { id: "eminonu", nameKey: "locationEminonu" }, 
+                { id: "ortakoy", nameKey: "locationOrtakoy" }, 
+                { id: "nisantasi", nameKey: "locationNisantasi" }
+            ];
+            const distanceMatrix = {
+                "taksim": { "sultanahmet": 5, "kadikoy": 15, "besiktas": 3, "ISTAirport": 40, "SAWAirport": 45, "galataport": 2, "eminonu": 4, "ortakoy": 4, "nisantasi": 2 },
+                "sultanahmet": { "taksim": 5, "kadikoy": 18, "besiktas": 8, "ISTAirport": 45, "SAWAirport": 48, "galataport": 4, "eminonu": 1, "ortakoy": 9, "nisantasi": 7 },
+                "kadikoy": { "taksim": 15, "sultanahmet": 18, "besiktas": 12, "ISTAirport": 55, "SAWAirport": 30, "galataport": 16, "eminonu": 17, "ortakoy": 13, "nisantasi": 17 },
+                "besiktas": { "taksim": 3, "sultanahmet": 8, "kadikoy": 12, "ISTAirport": 42, "SAWAirport": 46, "galataport": 5, "eminonu": 7, "ortakoy": 1, "nisantasi": 4 },
+                "ISTAirport": { "taksim": 40, "sultanahmet": 45, "kadikoy": 55, "besiktas": 42, "SAWAirport": 80, "galataport": 42, "eminonu": 44, "ortakoy": 43, "nisantasi": 41 },
+                "SAWAirport": { "taksim": 45, "sultanahmet": 48, "kadikoy": 30, "besiktas": 46, "ISTAirport": 80, "galataport": 47, "eminonu": 47, "ortakoy": 47, "nisantasi": 48 },
+                "galataport": { "taksim": 2, "sultanahmet": 4, "kadikoy": 16, "besiktas": 5, "ISTAirport": 42, "SAWAirport": 47, "eminonu": 2, "ortakoy": 6, "nisantasi": 4 },
+                "eminonu": { "taksim": 4, "sultanahmet": 1, "kadikoy": 17, "besiktas": 7, "ISTAirport": 44, "SAWAirport": 47, "galataport": 2, "ortakoy": 8, "nisantasi": 6 },
+                "ortakoy": { "taksim": 4, "sultanahmet": 9, "kadikoy": 13, "besiktas": 1, "ISTAirport": 43, "SAWAirport": 47, "galataport": 6, "eminonu": 8, "nisantasi": 5 },
+                "nisantasi": { "taksim": 2, "sultanahmet": 7, "kadikoy": 17, "besiktas": 4, "ISTAirport": 41, "SAWAirport": 48, "galataport": 4, "eminonu": 6, "ortakoy": 5 }
+            };
+
+            function populateLocationDropdowns() {
+                while (originSelect.options.length > 1) originSelect.remove(1);
+                while (destinationSelect.options.length > 1) destinationSelect.remove(1);
+
+                locations.forEach(location => {
+                    const translatedName = translations[location.nameKey] ? translations[location.nameKey][currentLanguage] : location.id;
+                    
+                    const optionOrigin = document.createElement('option');
+                    optionOrigin.value = location.id;
+                    optionOrigin.textContent = translatedName;
+                    originSelect.appendChild(optionOrigin);
+
+                    const optionDestination = document.createElement('option');
+                    optionDestination.value = location.id;
+                    optionDestination.textContent = translatedName;
+                    destinationSelect.appendChild(optionDestination);
+                });
+                if (originSelect.options[0] && translations.selectOriginOption && translations.selectOriginOption[currentLanguage]) {
+                    originSelect.options[0].textContent = translations.selectOriginOption[currentLanguage];
+                }
+                if (destinationSelect.options[0] && translations.selectDestinationOption && translations.selectDestinationOption[currentLanguage]) {
+                    destinationSelect.options[0].textContent = translations.selectDestinationOption[currentLanguage];
+                }
+            }
+            
+            calculateFareBtn.addEventListener('click', () => {
+                const originId = originSelect.value;
+                const destinationId = destinationSelect.value;
+
+                fareResultDiv.classList.remove('bg-red-100', 'border-red-300', 'text-red-700');
+                fareResultDiv.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-700');
+
+                if (!originId || !destinationId) {
+                    fareResultDiv.textContent = translations.fareCalcErrorOriginDest[currentLanguage]; 
+                    fareResultDiv.style.display = 'block';
+                    fareResultDiv.classList.remove('bg-blue-50', 'border-blue-200', 'text-blue-700');
+                    fareResultDiv.classList.add('bg-red-100', 'border-red-300', 'text-red-700');
+                    return;
+                }
+                if (originId === destinationId) {
+                    fareResultDiv.textContent = translations.fareCalcErrorSamePoint[currentLanguage].replace('{minFare}', minFare.toFixed(2)); 
+                    fareResultDiv.style.display = 'block';
+                    return;
+                }
+
+                let distance = 0;
+                if (distanceMatrix[originId] && distanceMatrix[originId][destinationId]) {
+                    distance = distanceMatrix[originId][destinationId];
+                } else if (distanceMatrix[destinationId] && distanceMatrix[destinationId][originId]) { 
+                    distance = distanceMatrix[destinationId][originId];
+                } else {
+                    fareResultDiv.textContent = translations.fareCalcErrorNoDistance[currentLanguage]; 
+                    fareResultDiv.style.display = 'block';
+                    fareResultDiv.classList.remove('bg-blue-50', 'border-blue-200', 'text-blue-700');
+                    fareResultDiv.classList.add('bg-red-100', 'border-red-300', 'text-red-700');
+                    return;
+                }
+
+                let estimatedFare = baseFare + (distance * perKmRate);
+                if (estimatedFare < minFare) {
+                    estimatedFare = minFare;
+                }
+                
+                const originText = originSelect.options[originSelect.selectedIndex].text;
+                const destText = destinationSelect.options[destinationSelect.selectedIndex].text;
+
+                fareResultDiv.textContent = translations.fareCalcResult[currentLanguage]
+                                            .replace('{origin}', originText)
+                                            .replace('{destination}', destText)
+                                            .replace('{distance}', distance)
+                                            .replace('{fare}', estimatedFare.toFixed(2));
+                fareResultDiv.style.display = 'block';
+            });
+            
+            populateLocationDropdowns();
+        } else {
+            console.error("Taxi fare calculator elements not found.");
+        }
+
+        const currentYearEl = document.getElementById('currentYear');
+        if (currentYearEl) {
+            currentYearEl.textContent = new Date().getFullYear();
+        }
+        
+        const mainPageContent = document.getElementById('mainPageContent');
+        
+        const accommodationDetailPage = document.getElementById('accommodationDetailPage');
+        const accommodationData = { 
+            "Lüks Oteller": { 
+                tr_title: "Lüks Oteller", en_title: "Luxury Hotels",
+                img: "https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&dpr=1", 
+                description: {tr: "İstanbul'un en prestijli lüks otelleri, genellikle Boğaz manzaralı veya tarihi yarımadada konumlanır. Misafirlerine unutulmaz bir konaklama deneyimi sunmak için kişiye özel hizmetler, gurme restoranlar, spa ve sağlıklı yaşam merkezleri gibi birçok olanak sunarlar. Mimari ve iç tasarım detayları göz alıcıdır.", en: "Istanbul's most prestigious luxury hotels are often located with Bosphorus views or in the historical peninsula. They offer a multitude of amenities such as personalized services, gourmet restaurants, spa and wellness centers to provide guests with an unforgettable accommodation experience. Architectural and interior design details are stunning."}, 
+                features: {tr: ["Nefes Kesen Boğaz Manzarası", "Ödüllü Restoranlar", "Lüks Spa ve Wellness Olanakları", "Kişiye Özel Hizmetler (Concierge, Butler vb.)", "Şık ve Geniş Odalar/Süitler"], en: ["Breathtaking Bosphorus Views", "Award-Winning Restaurants", "Luxury Spa and Wellness Facilities", "Personalized Services (Concierge, Butler, etc.)", "Elegant and Spacious Rooms/Suites"]}, 
+                priceRange: {tr: "Gecelik 5000 TL - 25000 TL arası (ve üzeri)", en: "€250 - €1200+ per night"}, 
+                examples: [
+                    { name: {tr: "The Peninsula Istanbul", en: "The Peninsula Istanbul"}, shortDesc: {tr: "Karaköy'de, tarihi binalarda modern lüks.", en: "Modern luxury in historical buildings in Karaköy."} },
+                    { name: {tr: "Four Seasons Hotel Istanbul at the Bosphorus", en: "Four Seasons Hotel Istanbul at the Bosphorus"}, shortDesc: {tr: "Boğaz'ın kıyısında, eski bir Osmanlı sarayında.", en: "On the shores of the Bosphorus, in a former Ottoman palace."} },
+                    { name: {tr: "Çırağan Palace Kempinski Istanbul", en: "Çırağan Palace Kempinski Istanbul"}, shortDesc: {tr: "Tarihi Çırağan Sarayı'nda eşsiz bir deneyim.", en: "A unique experience in the historic Çırağan Palace."} }
+                ]
+            },
+            "Butik Oteller": { 
+                tr_title: "Butik Oteller", en_title: "Boutique Hotels",
+                img: "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&dpr=1", 
+                description: {tr: "Tarihi yarımada başta olmak üzere şehrin farklı bölgelerinde yer alan butik oteller, genellikle daha az sayıda odaya sahip olup, kişiye özel hizmet ve özgün bir atmosfer sunarlar. Tarihi binaların restore edilmesiyle oluşturulan bu oteller, yerel kültürü yansıtan dekorasyonlarıyla dikkat çeker.", en: "Located in various parts of the city, especially the historical peninsula, boutique hotels usually have fewer rooms and offer personalized service and a unique atmosphere. Often created by restoring historical buildings, these hotels stand out with their decorations reflecting local culture."}, 
+                features: {tr: ["Otantik Atmosfer ve Özgün Tasarım", "Kişiye Özel Hizmet Anlayışı", "Merkezi Konumlar (Genellikle Tarihi Bölgelerde)", "Daha Samimi ve Sakin Bir Ortam", "Yerel Lezzetler Sunan Kahvaltılar"], en: ["Authentic Atmosphere and Unique Design", "Personalized Service Approach", "Central Locations (Usually in Historical Areas)", "A More Intimate and Calm Environment", "Breakfasts Featuring Local Delicacies"]}, 
+                priceRange: {tr: "Gecelik 2500 TL - 10000 TL arası", en: "€120 - €500 per night"}, 
+                examples: [ 
+                    { name: {tr: "Neorion Hotel (Sirkeci)", en: "Neorion Hotel (Sirkeci)"}, shortDesc: {tr: "Tarihi yarımadanın kalbinde, geleneksel Türk misafirperverliği.", en: "In the heart of the historical peninsula, traditional Turkish hospitality."} },
+                    { name: {tr: "Hotel Amira Istanbul (Sultanahmet)", en: "Hotel Amira Istanbul (Sultanahmet)"}, shortDesc: {tr: "Sultanahmet'te, zarif ve konforlu odalar.", en: "Elegant and comfortable rooms in Sultanahmet."} },
+                    { name: {tr: "Witt Istanbul Suites (Cihangir)", en: "Witt Istanbul Suites (Cihangir)"}, shortDesc: {tr: "Cihangir'in bohem atmosferinde, modern ve geniş süitler.", en: "Modern and spacious suites in the bohemian atmosphere of Cihangir."} }
+                ]
+            },
+            "Kiralık Daireler": { 
+                tr_title: "Kiralık Daireler", en_title: "Rental Apartments",
+                img: "https://images.pexels.com/photos/7535060/pexels-photo-7535060.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&dpr=1", 
+                description: {tr: "Özellikle uzun süreli konaklamalar veya aileler/arkadaş grupları için ideal olan kiralık daireler, ev konforunu ve daha fazla özgürlüğü bir arada sunar. Mutfak, oturma alanı gibi olanaklarla kendi yemeğinizi yapma ve daha geniş bir alanda konaklama imkanı tanır. Airbnb, Booking.com gibi platformlardan kolayca bulunabilir.", en: "Ideal especially for long-term stays or families/groups of friends, rental apartments offer home comfort and more freedom. With amenities like a kitchen and living area, they allow you to cook your own meals and stay in a larger space. Easily found on platforms like Airbnb, Booking.com."}, 
+                features: {tr: ["Ev Konforu ve Mahremiyet", "Kendi Yemeğini Yapma İmkanı (Mutfaklı)", "Daha Geniş Yaşam Alanı", "Uzun Süreli Konaklamalar İçin Uygun Fiyatlar", "Farklı Semtlerde Çeşitli Seçenekler"], en: ["Home Comfort and Privacy", "Option to Cook Your Own Meals (With Kitchen)", "Larger Living Space", "Affordable Prices for Long-Term Stays", "Various Options in Different Neighborhoods"]}, 
+                priceRange: {tr: "Gecelik 1500 TL - 7000 TL arası (Dairenin büyüklüğüne ve konumuna göre değişir)", en: "€70 - €350 per night (Varies depending on the size and location of the apartment)"}, 
+                examples: [ 
+                    { name: {tr: "Galata'da Tarihi Apartman Dairesi", en: "Historical Apartment in Galata"}, shortDesc: {tr: "Galata Kulesi'ne yakın, şık ve otantik.", en: "Near Galata Tower, stylish and authentic."} },
+                    { name: {tr: "Cihangir'de Boğaz Manzaralı Daire", en: "Apartment with Bosphorus View in Cihangir"}, shortDesc: {tr: "Modern dekorasyon, muhteşem manzara.", en: "Modern decoration, magnificent view."} },
+                    { name: {tr: "Kadıköy'de Merkezi Konumlu Stüdyo Daire", en: "Centrally Located Studio Apartment in Kadikoy"}, shortDesc: {tr: "Ulaşım ağlarına yakın, hareketli bir bölgede.", en: "Close to transportation networks, in a lively area."} }
+                ]
+            }
+        };
+
+        function showAccommodationDetailsPage(typeKey) { 
+            const data = accommodationData[typeKey];
+            if (data && mainPageContent && accommodationDetailPage) {
+                mainPageContent.style.display = 'none'; 
+                const title = data[currentLanguage + '_title'] || typeKey;
+                const description = data.description[currentLanguage] || data.description.tr;
+                const features = data.features[currentLanguage] || data.features.tr;
+                const priceRange = data.priceRange[currentLanguage] || data.priceRange.tr;
+                
+                let featuresHTML = '<ul>'; features.forEach(f => { featuresHTML += `<li>${f}</li>`; }); featuresHTML += '</ul>';
+                let examplesHTML = ''; 
+                if (data.examples && data.examples.length > 0) { 
+                    examplesHTML = `<h4 data-translate-key="exampleAccommodations">${translations.exampleAccommodations[currentLanguage]}</h4><ul class="list-none pl-0">`; 
+                    data.examples.forEach(ex => { 
+                        const exName = ex.name[currentLanguage] || ex.name.tr;
+                        const exDesc = ex.shortDesc[currentLanguage] || ex.shortDesc.tr;
+                        examplesHTML += `<li class="detail-example-item"><strong>${exName}:</strong> ${exDesc}</li>`; 
+                    }); 
+                    examplesHTML += '</ul>'; 
+                }
+                accommodationDetailPage.innerHTML = `<button id="backToMainAccommodationBtn" class="back-to-main-button" data-translate-key="backButton">${translations.backButton[currentLanguage]}</button><h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">${title}</h2><div class="detail-page-content"><img src="${data.img}" alt="${title}" onerror="this.onerror=null;this.src='https://placehold.co/800x500/cccccc/ffffff?text=Resim+Bulunamadı';"><p>${description}</p><h4 data-translate-key="featuredFeatures">${translations.featuredFeatures[currentLanguage]}</h4>${featuresHTML}${examplesHTML}<h4 data-translate-key="estimatedPriceRange">${translations.estimatedPriceRange[currentLanguage]}</h4><p>${priceRange}</p></div>`;
+                accommodationDetailPage.style.display = 'block'; window.scrollTo(0, 0); 
+                const backBtn = document.getElementById('backToMainAccommodationBtn');
+                if(backBtn && !backBtn.dataset.listenerAttached) { 
+                    backBtn.addEventListener('click', hideAccommodationDetailsPage);
+                    backBtn.dataset.listenerAttached = 'true';
+                }
+            }
+        }
+        function hideAccommodationDetailsPage() {
+            if (mainPageContent && accommodationDetailPage) { accommodationDetailPage.style.display = 'none'; accommodationDetailPage.innerHTML = ''; mainPageContent.style.display = 'block'; window.location.hash = '#konaklama'; }
+        }
+
+        const historicalPlaceDetailPage = document.getElementById('historicalPlaceDetailPage');
+        const historicalPlacesData = { 
+            "Ayasofya-i Kebir Cami-i Şerifi": { 
+                tr_title: "Ayasofya-i Kebir Cami-i Şerifi", en_title: "Hagia Sophia Grand Mosque",
+                img: "https://www.meroddi.com/wp-content/uploads/2022/06/ayasofyanin-gizemi.png", 
+                description: {tr: "Ayasofya, mimarlık tarihinde bir dönüm noktası olarak kabul edilen, Bizans İmparatoru I. Justinianus tarafından MS 532-537 yılları arasında İstanbul'un tarihi yarımadasına inşa ettirilmiş bir bazilika planlı patrik katedrali olup, 1453 yılında İstanbul'un fethiyle Fatih Sultan Mehmed tarafından camiye dönüştürülmüştür. Uzun yıllar müze olarak hizmet verdikten sonra 2020 yılında tekrar cami statüsüne kavuşmuştur. Mimari özellikleri, devasa kubbesi, mozaikleri ve tarihi önemiyle dünya çapında bir şaheserdir.", en: "Hagia Sophia, considered a turning point in architectural history, is a basilica-planned patriarchal cathedral built by Byzantine Emperor Justinian I between 532-537 AD on the historical peninsula of Istanbul. It was converted into a mosque by Mehmed the Conqueror with the conquest of Istanbul in 1453. After serving as a museum for many years, it regained its mosque status in 2020. It is a worldwide masterpiece with its architectural features, massive dome, mosaics, and historical significance."}, 
+                visitingInfo: {tr: "Cami olarak ibadete açıktır. Ziyaretçilerin ibadet saatlerine ve kıyafet kurallarına (kadınlar için başörtüsü, uzun ve bol giysiler; erkekler için omuzları ve dizleri örten giysiler) uyması beklenir. Giriş ücretsizdir.", en: "Open for worship as a mosque. Visitors are expected to respect prayer times and dress codes (headscarf, long and loose clothing for women; clothing covering shoulders and knees for men). Entrance is free."} 
+            },
+            "Galata Kulesi": { 
+                tr_title: "Galata Kulesi", en_title: "Galata Tower",
+                img: "https://perapalace.com/wp-content/uploads/2024/04/galata-kulesinin-tarihi-hikayesi.jpg", 
+                description: {tr: "İstanbul'un en ikonik simgelerinden biri olan Galata Kulesi, ilk olarak Bizans döneminde MS 528 yılında fener kulesi olarak inşa edilmiş, daha sonra Cenevizliler tarafından 1348'de yeniden yapılmıştır. Osmanlı döneminde çeşitli amaçlarla kullanılmış olan kule, günümüzde İstanbul'un panoramik manzarasını sunan bir gözlem noktası ve müze olarak hizmet vermektedir. Hezarfen Ahmed Çelebi'nin kanat takarak kuleden Üsküdar'a uçtuğu efsanesiyle de ünlüdür.", en: "One of Istanbul's most iconic symbols, the Galata Tower was first built as a lighthouse in 528 AD during the Byzantine era, and later rebuilt by the Genoese in 1348. Used for various purposes during the Ottoman period, the tower now serves as an observation deck and museum offering panoramic views of Istanbul. It is also famous for the legend of Hezarfen Ahmed Çelebi flying from the tower to Üsküdar with artificial wings."}, 
+                visitingInfo: {tr: "Ziyarete açıktır. Kuleye çıkarak İstanbul'un 360 derecelik manzarasını seyredebilirsiniz. Giriş ücretlidir. Yoğun dönemlerde sıra beklenebilir.", en: "Open to visitors. You can go up the tower to enjoy a 360-degree view of Istanbul. There is an entrance fee. Queues can be expected during peak seasons."}
+            },
+            "Kız Kulesi": {
+                tr_title: "Kız Kulesi", en_title: "Maiden's Tower",
+                img: "https://cdn.akkahotels.com/Uploads/Cms/kiz-kulesi.webp", 
+                description: {tr: "İstanbul Boğazı'nın Salacak açıklarındaki küçük bir adacık üzerinde yer alan Kız Kulesi, tarihi MÖ 5. yüzyıla kadar uzanan efsanevi bir yapıdır. Yüzyıllar boyunca gümrük istasyonu, fener, sürgün yeri ve savunma kalesi gibi çeşitli amaçlarla kullanılmıştır. Hakkında birçok efsane anlatılan kule, restore edilerek günümüzde müze ve restoran olarak hizmet vermektedir.", en: "Located on a small islet off the coast of Salacak in the Bosphorus, the Maiden's Tower is a legendary structure dating back to the 5th century BC. Over the centuries, it has been used for various purposes such as a customs station, lighthouse, place of exile, and defense fortress. The tower, about which many legends are told, has been restored and now serves as a museum and restaurant."},
+                visitingInfo: {tr: "Anıt müze olarak ziyarete açıktır. Kuleye ulaşım Salacak veya Ortaköy'den kalkan teknelerle sağlanmaktadır. Giriş ve tekne ücreti bulunmaktadır. İçerisinde sergi alanları ve bir kafe/restoran bulunmaktadır.", en: "Open to visitors as a monument museum. Access to the tower is provided by boats departing from Salacak or Ortaköy. There is an entrance and boat fee. It houses exhibition areas and a cafe/restaurant."}
+            },
+            "Topkapı Sarayı": {
+                tr_title: "Topkapı Sarayı", en_title: "Topkapi Palace",
+                img: "https://cdn.akkahotels.com/Uploads/Blog/topkapi-sarayi-istanbul_4.webp", 
+                description: {tr: "Osmanlı İmparatorluğu'nun yaklaşık 400 yıl boyunca idare merkezi ve padişahların ikametgahı olan Topkapı Sarayı, İstanbul'un fethinden sonra Fatih Sultan Mehmed tarafından 1460-1478 yılları arasında inşa ettirilmiştir. Saray, içerisinde barındırdığı zengin koleksiyonlar, kutsal emanetler, divan odaları, harem bölümü ve muhteşem avlularıyla Osmanlı tarihini ve kültürünü yansıtan eşsiz bir yapıdır.", en: "The administrative center of the Ottoman Empire and the residence of the sultans for nearly 400 years, Topkapi Palace was built by Mehmed the Conqueror between 1460-1478 after the conquest of Istanbul. The palace is a unique structure reflecting Ottoman history and culture with its rich collections, sacred relics, council chambers, harem section, and magnificent courtyards."},
+                visitingInfo: {tr: "Müze olarak ziyarete açıktır. Sarayın farklı bölümleri (Harem, Kutsal Emanetler vb.) için ayrı biletler veya kombine biletler gerekebilir. Geniş bir alana yayıldığı için ziyaret için yeterli zaman ayırmanız önerilir. Giriş ücretlidir.", en: "Open to visitors as a museum. Separate or combined tickets may be required for different sections of the palace (Harem, Sacred Relics, etc.). It is recommended to allocate sufficient time for the visit as it covers a large area. There is an entrance fee."}
+            }
+        };
+
+        function showHistoricalPlaceDetailsPage(placeKey) { 
+            const data = historicalPlacesData[placeKey];
+            if (data && mainPageContent && historicalPlaceDetailPage) {
+                mainPageContent.style.display = 'none';
+                const title = data[currentLanguage + '_title'] || placeKey;
+                const description = data.description[currentLanguage] || data.description.tr;
+                const visitingInfo = data.visitingInfo[currentLanguage] || data.visitingInfo.tr;
+
+                historicalPlaceDetailPage.innerHTML = `<button id="backToMainHistoricalBtn" class="back-to-main-button" data-translate-key="backButton">${translations.backButton[currentLanguage]}</button><h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">${title}</h2><div class="detail-page-content"><img src="${data.img}" alt="${title}" onerror="this.onerror=null;this.src='https://placehold.co/800x500/cccccc/ffffff?text=Resim+Bulunamadı';"><p>${description}</p>${visitingInfo ? `<h4 data-translate-key="visitingInfoLabel">${translations.visitingInfoLabel[currentLanguage]}</h4><p>${visitingInfo}</p>` : ''}</div>`;
+                historicalPlaceDetailPage.style.display = 'block'; window.scrollTo(0, 0);
+                const backBtn = document.getElementById('backToMainHistoricalBtn');
+                 if(backBtn && !backBtn.dataset.listenerAttached) {
+                    backBtn.addEventListener('click', hideHistoricalPlaceDetailsPage);
+                    backBtn.dataset.listenerAttached = 'true';
+                }
+            }
+        }
+        function hideHistoricalPlaceDetailsPage() {
+            if (mainPageContent && historicalPlaceDetailPage) { historicalPlaceDetailPage.style.display = 'none'; historicalPlaceDetailPage.innerHTML = ''; mainPageContent.style.display = 'block'; window.location.hash = '#tarihi-mekanlar'; }
+        }
+
+        const turkishCultureDetailPage = document.getElementById('turkishCultureDetailPage');
+        const turkishCultureData = { 
+            "Tarihi Türk Hamamları": {
+                tr_title: "Tarihi Türk Hamamları", en_title: "Historical Turkish Baths",
+                img: "https://cdn1.ntv.com.tr/gorsel/FCqNsPfeWEukeCAMeEXlsg.jpg?width=1000&mode=both&scale=both&v=1536917019993", 
+                description: {tr: "Türk hamamı, sadece bir yıkanma yeri olmanın ötesinde, yüzyıllardır süregelen bir sosyal ve kültürel geleneğin merkezidir. Roma ve Bizans banyo geleneklerinden etkilenerek gelişen Türk hamamları, sıcaklık, buhar ve masajla bedensel ve ruhsal arınma sunar. Genellikle 'sıcaklık', 'soğukluk' ve 'ılıklık' gibi bölümlerden oluşur.", en: "The Turkish bath, beyond being just a place for washing, is the center of a social and cultural tradition that has lasted for centuries. Influenced by Roman and Byzantine bathing traditions, Turkish baths offer physical and spiritual purification through heat, steam, and massage. They usually consist of sections such as 'hot room', 'cold room', and 'warm room'."},
+                tips: {tr: ["Hamama gitmeden önce hafif bir şeyler yiyin.", "Kendi peştamal, havlu ve terliğinizi getirebilir veya hamamdan temin edebilirsiniz.", "Kese ve köpük masajı hizmetlerini deneyimleyin.", "Hamam sonrası bol su için ve dinlenin."], en: ["Eat something light before going to the bath.", "You can bring your own peshtemal, towel, and slippers, or get them from the bath.", "Experience the scrubbing (kese) and foam massage services.", "Drink plenty of water and rest after the bath."]},
+                examples: [
+                    { name: {tr: "Çemberlitaş Hamamı (1584)", en: "Cemberlitas Hammam (1584)"}, shortDesc: {tr: "Mimar Sinan tarafından inşa edilen, İstanbul'un en eski ve ünlü hamamlarından biri.", en: "One of Istanbul's oldest and most famous baths, built by Mimar Sinan."} },
+                    { name: {tr: "Cağaloğlu Hamamı (1741)", en: "Cagaloglu Hammam (1741)"}, shortDesc: {tr: "Barok tarzı mimarisiyle dikkat çeken, tarihi bir hamam.", en: "A historic bath notable for its Baroque style architecture."} },
+                    { name: {tr: "Süleymaniye Hamamı (1557)", en: "Suleymaniye Hammam (1557)"}, shortDesc: {tr: "Süleymaniye Külliyesi'nin bir parçası olan, Mimar Sinan eseri görkemli bir hamam.", en: "A magnificent bath, part of the Suleymaniye Complex, designed by Mimar Sinan."} }
+                ]
+            },
+            "Lezzetli Türk Mutfağı": {
+                tr_title: "Lezzetli Türk Mutfağı", en_title: "Delicious Turkish Cuisine",
+                img: "https://i.tgrthaber.com/images/haberler/2022_01/xbuyuk/turk-mutfagi-abd-de-damga-vurdu-birbirinde-lezzetli-yemekler-sunuldu-1642228291.jpg", 
+                description: {tr: "Türk mutfağı, Orta Asya, Orta Doğu, Balkanlar ve Akdeniz mutfaklarının zengin bir sentezidir. Et yemekleri, sebzeli tencere yemekleri, mezeler, hamur işleri ve tatlılar konusunda geniş bir yelpazeye sahiptir. Her bölgenin kendine özgü lezzetleri bulunur ve taze, mevsimlik malzemeler kullanılır.", en: "Turkish cuisine is a rich synthesis of Central Asian, Middle Eastern, Balkan, and Mediterranean cuisines. It has a wide range of meat dishes, vegetable stews, mezes, pastries, and desserts. Each region has its own unique flavors, and fresh, seasonal ingredients are used."},
+                mustTry: {tr: ["İskender Kebap", "Mantı", "Mercimek Çorbası", "Zeytinyağlı Enginar", "Karnıyarık", "Baklava", "Künefe", "Türk Kahvesi", "Ayran"], en: ["Iskender Kebap", "Manti (Turkish Ravioli)", "Lentil Soup", "Artichokes in Olive Oil", "Stuffed Eggplant (Karniyarik)", "Baklava", "Kunefe", "Turkish Coffee", "Ayran (Yogurt Drink)"]},
+                restaurantTypes: [
+                    { name: {tr: "Esnaf Lokantaları", en: "Artisan Restaurants (Esnaf Lokantasi)"}, shortDesc: {tr: "Günlük, taze ve ev yapımı geleneksel Türk yemekleri sunan, uygun fiyatlı mekanlar.", en: "Affordable places offering daily, fresh, and homemade traditional Turkish dishes."} },
+                    { name: {tr: "Kebapçılar", en: "Kebab Restaurants"}, shortDesc: {tr: "Çeşitli kebap türlerinin ve ızgara etlerin sunulduğu restoranlar.", en: "Restaurants serving various types of kebabs and grilled meats."} },
+                    { name: {tr: "Meyhaneler", en: "Taverns (Meyhane)"}, shortDesc: {tr: "Rakı eşliğinde zengin meze çeşitleri ve ara sıcakların sunulduğu, genellikle canlı müzik olan geleneksel mekanlar.", en: "Traditional venues offering a rich variety of mezes and hot appetizers, usually accompanied by raki and often live music."} },
+                    { name: {tr: "Balık Restoranları", en: "Fish Restaurants"}, shortDesc: {tr: "Özellikle Boğaz kenarında taze deniz ürünleri ve balık çeşitleri sunan restoranlar.", en: "Restaurants, especially by the Bosphorus, offering fresh seafood and fish."} }
+                ]
+            }
+        };
+
+        function showTurkishCultureDetailsPage(typeKey) { 
+            const data = turkishCultureData[typeKey];
+            if (data && mainPageContent && turkishCultureDetailPage) {
+                mainPageContent.style.display = 'none';
+                const title = data[currentLanguage + '_title'] || typeKey;
+                const description = data.description[currentLanguage] || data.description.tr;
+
+                let contentHTML = `<button id="backToMainCultureBtn" class="back-to-main-button" data-translate-key="backButton">${translations.backButton[currentLanguage]}</button><h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">${title}</h2><div class="detail-page-content"><img src="${data.img}" alt="${title}" onerror="this.onerror=null;this.src='https://placehold.co/800x500/cccccc/ffffff?text=Resim+Bulunamadı';"><p>${description}</p>`;
+                
+                if (data.tips && (data.tips[currentLanguage] || data.tips.tr)) {
+                    const tips = data.tips[currentLanguage] || data.tips.tr;
+                    contentHTML += `<h4 data-translate-key="tipsLabel">${translations.tipsLabel[currentLanguage]}</h4><ul>`;
+                    tips.forEach(tip => { contentHTML += `<li>${tip}</li>`; });
+                    contentHTML += '</ul>';
+                }
+                if (data.examples && data.examples.length > 0) {
+                    contentHTML += `<h4 data-translate-key="exampleVenuesLabel">${translations.exampleVenuesLabel[currentLanguage]}</h4><ul class="list-none pl-0">`;
+                    data.examples.forEach(ex => { 
+                        const exName = ex.name[currentLanguage] || ex.name.tr;
+                        const exDesc = ex.shortDesc[currentLanguage] || ex.shortDesc.tr;
+                        contentHTML += `<li class="detail-example-item"><strong>${exName}:</strong> ${exDesc}</li>`; 
+                    });
+                    contentHTML += '</ul>';
+                }
+                if (data.mustTry && (data.mustTry[currentLanguage] || data.mustTry.tr)) {
+                     const mustTryItems = data.mustTry[currentLanguage] || data.mustTry.tr;
+                    contentHTML += `<h4 data-translate-key="mustTryLabel">${translations.mustTryLabel[currentLanguage]}</h4><ul>`;
+                    mustTryItems.forEach(item => { contentHTML += `<li>${item}</li>`; });
+                    contentHTML += '</ul>';
+                }
+                if (data.restaurantTypes && data.restaurantTypes.length > 0) {
+                    contentHTML += `<h4 data-translate-key="restaurantTypesLabel">${translations.restaurantTypesLabel[currentLanguage]}</h4><ul class="list-none pl-0">`;
+                    data.restaurantTypes.forEach(rt => { 
+                        const rtName = rt.name[currentLanguage] || rt.name.tr;
+                        const rtDesc = rt.shortDesc[currentLanguage] || rt.shortDesc.tr;
+                        contentHTML += `<li class="detail-example-item"><strong>${rtName}:</strong> ${rtDesc}</li>`; 
+                    });
+                    contentHTML += '</ul>';
+                }
+
+                contentHTML += '</div>';
+                turkishCultureDetailPage.innerHTML = contentHTML;
+                turkishCultureDetailPage.style.display = 'block';
+                window.scrollTo(0, 0);
+                const backBtn = document.getElementById('backToMainCultureBtn');
+                if(backBtn && !backBtn.dataset.listenerAttached) {
+                    backBtn.addEventListener('click', hideTurkishCultureDetailsPage);
+                    backBtn.dataset.listenerAttached = 'true';
+                }
+            }
+        }
+        function hideTurkishCultureDetailsPage() {
+            if (mainPageContent && turkishCultureDetailPage) { turkishCultureDetailPage.style.display = 'none'; turkishCultureDetailPage.innerHTML = ''; mainPageContent.style.display = 'block'; window.location.hash = '#turk-kulturu'; }
+        }
+
+        const subscriptionDetailPage = document.getElementById('subscriptionDetailPage');
+        const paymentPage = document.getElementById('paymentPage');
+        const selectedPlanNameEl = document.getElementById('selectedPlanName');
+        const selectedPlanPriceEl = document.getElementById('selectedPlanPrice');
+
+        function showSubscriptionPage(event) {
+            event.preventDefault(); 
+            if (mainPageContent && subscriptionDetailPage) {
+                mainPageContent.style.display = 'none';
+                if(accommodationDetailPage) accommodationDetailPage.style.display = 'none';
+                if(historicalPlaceDetailPage) historicalPlaceDetailPage.style.display = 'none';
+                if(turkishCultureDetailPage) turkishCultureDetailPage.style.display = 'none';
+                if(paymentPage) paymentPage.style.display = 'none';
+
+                subscriptionDetailPage.style.display = 'block';
+                window.scrollTo(0,0);
+                const backBtn = document.getElementById('backToMainFromSubscriptionBtn');
+                if (backBtn && !backBtn.dataset.listenerAttached) {
+                     backBtn.addEventListener('click', hideSubscriptionPage);
+                     backBtn.dataset.listenerAttached = 'true'; 
+                }
+                const subPageTitle = subscriptionDetailPage.querySelector('h2[data-translate-key="subscriptionPlansTitle"]');
+                if (subPageTitle && translations.subscriptionPlansTitle && translations.subscriptionPlansTitle[currentLanguage]) {
+                    subPageTitle.textContent = translations.subscriptionPlansTitle[currentLanguage];
+                }
+                subscriptionDetailPage.querySelectorAll('.subscription-plan').forEach(planEl => {
+                    planEl.querySelectorAll('[data-translate-key]').forEach(el => {
+                        const key = el.getAttribute('data-translate-key');
+                        if(translations[key] && translations[key][currentLanguage]){
+                            el.textContent = translations[key][currentLanguage];
+                        }
+                    });
+                });
+            }
+        }
+
+        function hideSubscriptionPage() {
+            if (mainPageContent && subscriptionDetailPage) {
+                subscriptionDetailPage.style.display = 'none';
+                mainPageContent.style.display = 'block';
+            }
+        }
+        
+        function showPaymentPage(planNameKey, planPrice) { 
+            if (subscriptionDetailPage && paymentPage && selectedPlanNameEl && selectedPlanPriceEl) {
+                subscriptionDetailPage.style.display = 'none'; 
+
+                selectedPlanNameEl.textContent = translations[planNameKey] ? translations[planNameKey][currentLanguage] : planNameKey;
+                selectedPlanNameEl.dataset.key = planNameKey; 
+                selectedPlanPriceEl.textContent = planPrice; 
+                
+                paymentPage.style.display = 'block';
+                window.scrollTo(0,0);
+
+                const backToSubBtn = document.getElementById('backToSubscriptionPageBtn');
+                 if (backToSubBtn && !backToSubBtn.dataset.listenerAttached) {
+                     backToSubBtn.addEventListener('click', () => {
+                        hidePaymentPage();
+                        showSubscriptionPage(new Event('click')); 
+                     });
+                     backToSubBtn.dataset.listenerAttached = 'true';
+                }
+                paymentPage.querySelectorAll('[data-translate-key]').forEach(el => {
+                    const key = el.getAttribute('data-translate-key');
+                    if(translations[key] && translations[key][currentLanguage]){
+                        if (el.tagName === 'INPUT' && el.placeholder && translations[key][currentLanguage]) {
+                        } else {
+                           el.textContent = translations[key][currentLanguage];
+                        }
+                    }
+                });
+            }
+        }
+        function hidePaymentPage() {
+             if (paymentPage) { 
+                paymentPage.style.display = 'none';
+            }
+        }
+        
+        const paymentForm = document.getElementById('paymentForm');
+        if(paymentForm) {
+            paymentForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const paymentMessage = currentLanguage === 'tr' ? 'Ödemeniz başarıyla alındı! Aboneliğiniz aktif edildi.' : 'Payment received successfully! Your subscription has been activated.';
+                showCustomMessage(paymentMessage, true);
+                paymentForm.reset(); 
+                hidePaymentPage();
+                setTimeout(() => { 
+                    if (mainPageContent) mainPageContent.style.display = 'block';
+                    window.scrollTo(0,0);
+                }, 500); 
+            });
+        }
+
+        function showCustomMessage(message, isSuccess) {
+            const messageBoxId = 'customMessageBox';
+            let messageBox = document.getElementById(messageBoxId);
+            if (!messageBox) {
+                messageBox = document.createElement('div');
+                messageBox.id = messageBoxId;
+                messageBox.style.position = 'fixed';
+                messageBox.style.top = '20px';
+                messageBox.style.left = '50%';
+                messageBox.style.transform = 'translateX(-50%)';
+                messageBox.style.padding = '15px 20px';
+                messageBox.style.borderRadius = '8px';
+                messageBox.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                messageBox.style.zIndex = '1000';
+                messageBox.style.opacity = '0';
+                messageBox.style.transition = 'opacity 0.5s ease-in-out, top 0.5s ease-in-out'; 
+                messageBox.style.textAlign = 'center';
+                messageBox.style.minWidth = '250px';
+                messageBox.style.maxWidth = '90%';
+
+                document.body.appendChild(messageBox);
+            }
+            
+            messageBox.textContent = message;
+            messageBox.style.backgroundColor = isSuccess ? '#4CAF50' : '#f44336'; 
+            messageBox.style.color = 'white';
+            
+            requestAnimationFrame(() => { 
+                 messageBox.style.opacity = '1';
+                 messageBox.style.top = '30px'; 
+            });
+
+            setTimeout(() => {
+                messageBox.style.opacity = '0';
+                messageBox.style.top = '0px'; 
+                setTimeout(() => { 
+                    if (messageBox.parentNode) {
+                        messageBox.parentNode.removeChild(messageBox);
+                    }
+                }, 500); 
+            }, 3000); 
+        }
+
+        const langSelector = document.getElementById('languageSelector');
+        const langSelectorMobile = document.getElementById('languageSelectorMobile');
+
+        function handleLanguageChange(event) {
+            applyTranslations(event.target.value);
+        }
+
+        if(langSelector) langSelector.addEventListener('change', handleLanguageChange);
+        if(langSelectorMobile) langSelectorMobile.addEventListener('change', handleLanguageChange);
+
+        const monthNames = {
+            tr: ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"],
+            en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+        };
+        
+        const allEvents = [ 
+            { date: "2025-05-24", title: {tr:"Topkapı Sarayı Özel Turu", en:"Special Topkapi Palace Tour"}, description: {tr:"Rehber eşliğinde Topkapı Sarayı'nın gizli kalmış bölümlerini keşfedin.", en:"Discover the hidden sections of Topkapi Palace with a guide."}, time: "10:00 - 14:00", type: "diger" },
+            { date: "2025-05-24", title: {tr:"Boğaz'da Caz Akşamı", en:"Jazz Night on the Bosphorus"}, description: {tr:"İstanbul Boğazı'nda canlı caz müziği eşliğinde unutulmaz bir akşam yemeği.", en:"An unforgettable dinner on the Bosphorus with live jazz music."}, time: "19:30 - 22:30", type: "konser" },
+            { date: "2025-05-25", title: {tr:"Modern Sanat Sergisi Açılışı", en:"Modern Art Exhibition Opening"}, description: {tr:"Ünlü sanatçıların eserlerinin yer aldığı yeni serginin açılış kokteyli.", en:"Opening cocktail for the new exhibition featuring works by famous artists."}, time: "18:00 - 21:00", type: "diger" },
+            { date: "2025-05-28", title: {tr:"Klasik Türk Müziği Konseri", en:"Classical Turkish Music Concert"}, description: {tr:"Geleneksel Türk müziğinin seçkin eserleri.", en:"Distinguished works of traditional Turkish music."}, time: "20:00 - 22:00", type: "konser" },
+            // New June Events
+            { date: "2025-06-01", title: {tr:"Pazar Yürüyüşü & Kahvaltı (Belgrad Ormanı)", en:"Sunday Hike & Breakfast (Belgrad Forest)"}, description: {tr:"Belgrad Ormanı'nda doğa ile iç içe bir yürüyüş ve ardından keyifli bir kahvaltı.", en:"A walk in nature in Belgrad Forest followed by a delightful breakfast."}, time: "09:00 - 13:00", type: "diger" },
+            { date: "2025-06-02", title: {tr:"Belgesel Akşamı: İstanbul'un Sırları", en:"Documentary Night: Secrets of Istanbul"}, description: {tr:"İstanbul'un az bilinen tarihini ve hikayelerini anlatan özel bir belgesel gösterimi.", en:"A special documentary screening revealing lesser-known history and stories of Istanbul."}, time: "20:30", type: "sinema" },
+            { date: "2025-06-03", title: {tr:"Geleneksel Ebru Sanatı Atölyesi", en:"Traditional Ebru Art Workshop"}, description: {tr:"Ebru sanatının inceliklerini öğrenin ve kendi eserinizi yaratın.", en:"Learn the intricacies of Ebru art and create your own masterpiece."}, time: "14:00 - 17:00", type: "diger" },
+            { date: "2025-06-04", title: {tr:"Açık Hava Tiyatrosu: Bir Yaz Gecesi Rüyası", en:"Open-Air Theatre: A Midsummer Night's Dream"}, description: {tr:"Shakespeare'in klasik eserinin yıldızların altında keyifli bir yorumu.", en:"A delightful interpretation of Shakespeare's classic play under the stars."}, time: "21:00", type: "tiyatro" },
+            { date: "2025-06-05", title: {tr:"Fotoğrafçılık Turu: Tarihi Yarımada", en:"Photography Tour: Historical Peninsula"}, description: {tr:"Profesyonel bir fotoğrafçı eşliğinde Tarihi Yarımada'nın en güzel karelerini yakalayın.", en:"Capture the most beautiful shots of the Historical Peninsula with a professional photographer."}, time: "15:00 - 18:00", type: "diger" },
+            { date: "2025-06-06", title: {tr:"Canlı Müzik: Akustik Cuma (Kadıköy Sahne)", en:"Live Music: Acoustic Friday (Kadikoy Stage)"}, description: {tr:"Kadıköy'ün popüler mekanında yerel sanatçıların akustik performansları.", en:"Acoustic performances by local artists at a popular venue in Kadikoy."}, time: "21:30", type: "konser" },
+            { date: "2025-06-07", title: {tr:"Boğaz Turu ve Akşam Yemeği (Mehtap Turu)", en:"Bosphorus Cruise & Dinner (Moonlight Tour)"}, description: {tr:"Ay ışığında İstanbul Boğazı'nın büyüleyici manzarası eşliğinde romantik bir akşam yemeği.", en:"A romantic dinner with the enchanting view of the Bosphorus under the moonlight."}, time: "20:00 - 23:00", type: "diger" },
+            { date: "2025-06-08", title: {tr:"Yoga ve Meditasyon Etkinliği (Moda Sahili)", en:"Yoga and Meditation Event (Moda Coast)"}, description: {tr:"Moda Sahili'nde deniz manzarasına karşı yoga ve meditasyon seansı.", en:"Yoga and meditation session facing the sea view at Moda Coast."}, time: "08:00 - 09:30", type: "diger" },
+            { date: "2025-06-09", title: {tr:"Edebiyat Söyleşisi: Şehir ve Hafıza", en:"Literature Talk: City and Memory"}, description: {tr:"Tanınmış yazarlarla İstanbul'un edebi hafızası üzerine bir söyleşi.", en:"A conversation with renowned writers on Istanbul's literary memory."}, time: "19:00", type: "diger" },
+            { date: "2025-06-10", title: {tr:"Opera Gösterimi: La Traviata (Süreyya Operası)", en:"Opera Performance: La Traviata (Sureyya Opera House)"}, description: {tr:"Verdi'nin ölümsüz eseri La Traviata, tarihi Süreyya Operası'nda.", en:"Verdi's immortal work La Traviata at the historic Sureyya Opera House."}, time: "20:00", type: "opera" },
+            { date: "2025-06-11", title: {tr:"Çocuklar için Kukla Tiyatrosu: Macera Ormanı", en:"Puppet Theatre for Kids: Adventure Forest"}, description: {tr:"Minik tiyatroseverler için eğlenceli ve öğretici bir kukla gösterisi.", en:"A fun and educational puppet show for little theatre lovers."}, time: "11:00", type: "tiyatro" },
+            { date: "2025-06-12", title: {tr:"Yerel Pazarları Keşif Turu (Kadıköy Salı Pazarı)", en:"Local Markets Discovery Tour (Kadikoy Tuesday Market)"}, description: {tr:"Kadıköy'ün meşhur Salı Pazarı'nda yerel ürünleri ve atmosferi keşfedin. (Not: Perşembe günü için sembolik)", en:"Discover local products and atmosphere at Kadikoy's famous Tuesday Market. (Note: Symbolic for Thursday)"}, time: "10:00 - 13:00", type: "diger" },
+            { date: "2025-06-13", title: {tr:"Elektronik Müzik Gecesi (Bomontiada)", en:"Electronic Music Night (Bomontiada)"}, description: {tr:"Bomontiada'nın enerjik atmosferinde DJ performansları.", en:"DJ performances in the energetic atmosphere of Bomontiada."}, time: "22:00", type: "konser" },
+            { date: "2025-06-14", title: {tr:"Bale Gösterisi: Kuğu Gölü (AKM)", en:"Ballet Performance: Swan Lake (AKM)"}, description: {tr:"Çaykovski'nin başyapıtı Kuğu Gölü, Atatürk Kültür Merkezi'nde.", en:"Tchaikovsky's masterpiece Swan Lake at the Ataturk Cultural Center."}, time: "20:00", type: "bale" },
+            { date: "2025-06-15", title: {tr:"Antika Pazarı ve Koleksiyonerler Buluşması (Feriköy)", en:"Antique Market & Collectors' Meetup (Ferikoy)"}, description: {tr:"Feriköy Antika Pazarı'nda nadir parçaları keşfedin ve koleksiyonerlerle tanışın.", en:"Discover rare items at Ferikoy Antique Market and meet collectors."}, time: "09:00 - 18:00", type: "diger" }
+        ];
+        let calendarInstance; 
+
+        function updateFullCalendarEvents(lang) {
+            if (calendarInstance) {
+                calendarInstance.removeAllEvents(); 
+                calendarInstance.addEventSource(
+                    allEvents.map(event => ({
+                        title: event.title[lang] || event.title.tr,
+                        start: event.date,
+                        extendedProps: {
+                            description: event.description[lang] || event.description.tr,
+                            time: event.time,
+                            type: event.type || 'diger' 
+                        },
+                        className: `event-${event.type || 'diger'}` 
+                    }))
+                );
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('fullCalendarContainer');
+            const eventsForDateDiv = document.getElementById('eventsForDate');
+            const eventListContainerTitle = document.querySelector('#eventListContainer h3');
+
+            if (calendarEl && eventsForDateDiv && eventListContainerTitle) {
+                calendarInstance = new FullCalendar.Calendar(calendarEl, {
+                    locale: currentLanguage, 
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,listWeek' 
+                    },
+                    buttonText: { 
+                        today: currentLanguage === 'tr' ? 'Bugün' : 'Today',
+                        month: currentLanguage === 'tr' ? 'Ay' : 'Month',
+                        week: currentLanguage === 'tr' ? 'Hafta' : 'Week',
+                        day: currentLanguage === 'tr' ? 'Gün' : 'Day',
+                        list: currentLanguage === 'tr' ? 'Liste' : 'List'
+                    },
+                    dateClick: function(info) {
+                        showEventsForDateFC(info.dateStr, allEvents, eventsForDateDiv, eventListContainerTitle);
+                    },
+                    eventClick: function(info) {
+                        showEventsForDateFC(info.event.startStr.substring(0,10), allEvents, eventsForDateDiv, eventListContainerTitle); 
+                    },
+                    initialDate: '2025-05-24', 
+                });
+                calendarInstance.render();
+                applyTranslations(currentLanguage); 
+                showEventsForDateFC('2025-05-24', allEvents, eventsForDateDiv, eventListContainerTitle); 
+
+            } else {
+                console.error("FullCalendar için gerekli HTML elementleri bulunamadı.");
+            }
+        });
+
+        function showEventsForDateFC(dateString, sourceEvents, targetDiv, targetTitleEl) {
+            targetDiv.innerHTML = ''; 
+            const eventsOnDate = sourceEvents.filter(event => event.date === dateString);
+            
+            const dateParts = dateString.split('-');
+            const year = parseInt(dateParts[0]);
+            const monthIndex = parseInt(dateParts[1]) - 1; 
+            const day = parseInt(dateParts[2]);
+            
+            const displayMonthName = (monthNames[currentLanguage] && monthNames[currentLanguage][monthIndex]) ? monthNames[currentLanguage][monthIndex] : (monthIndex + 1).toString();
+            const formattedDate = `${day} ${displayMonthName} ${year}`;
+            targetTitleEl.textContent = `${formattedDate} ${(translations.selectedDayEventsTitle && translations.selectedDayEventsTitle[currentLanguage]) || 'Etkinlikleri'}`;
+
+
+            if (eventsOnDate.length > 0) {
+                eventsOnDate.forEach(event => {
+                    const eventEl = document.createElement('div');
+                    eventEl.classList.add('event-item');
+                    const eventTitle = event.title[currentLanguage] || event.title.tr;
+                    const eventDesc = event.description[currentLanguage] || event.description.tr;
+                    eventEl.innerHTML = `
+                        <h4>${eventTitle}</h4>
+                        <p class="text-gray-600">${eventDesc || ''}</p>
+                        ${event.time ? `<p class="text-gray-500 text-xs mt-1">Saat: ${event.time}</p>` : ''}
+                    `; 
+                    targetDiv.appendChild(eventEl);
+                });
+            } else {
+                targetDiv.innerHTML = `<p class="text-gray-500">${translations.noEventsForThisDate[currentLanguage]}</p>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            applyTranslations(currentLanguage);
+        });
+    </script>
+</body>
+</html>
